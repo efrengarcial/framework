@@ -1,4 +1,4 @@
-package users
+package service
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 )
 
 // UsersService describes the service.
-type UserService interface {
+type UsersService interface {
 	// Add your methods here
 	// e.x: Foo(ctx context.Context,s string)(rs string, err error)
 	Create(ctx context.Context, req *model.User) (*model.User, error)
