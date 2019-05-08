@@ -24,7 +24,7 @@ func (gr GormRepository) Insert(model model.IModel) (model.IModel, error){
 	return model, nil
 }
 
-func (gr GormRepository) Update(model model.IModel) (error){
+func (gr GormRepository) Update(model model.IModel) error {
 	if err := model.Validate(); err != nil{
 		return err
 	}
@@ -38,14 +38,14 @@ func (gr GormRepository) Save(model model.IModel) (uint64, error){
 	if err := gr.Db.Save(model).Error; err != nil{
 		return 0, err
 	}
-	return model.GetId(), nil
+	return model.GetID(), nil
 }
 
-func (gr GormRepository) FindById(receiver model.IModel, id uint64) (error){
+func (gr GormRepository) FindById(receiver model.IModel, id uint64) error {
 	return gr.Db.First(receiver, id).Error
 }
 
-func (gr GormRepository) FindFirst(receiver model.IModel, where string, args ...interface{}) (error){
+func (gr GormRepository) FindFirst(receiver model.IModel, where string, args ...interface{}) error {
 	return gr.Db.Where(where, args...).Limit(1).Find(receiver).Error
 }
 

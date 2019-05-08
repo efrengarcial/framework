@@ -16,12 +16,11 @@ var logger log.Logger
 
 
 func init() {
-	// Init ConfigMap here
 	logger = log.NewLogfmtLogger(os.Stderr)
 	logger = log.NewSyncLogger(logger)
 	logger = level.NewFilter(logger, level.AllowDebug())
 	logger = log.With(logger,
-		"svc", "order",
+		"svc", "users",
 		"ts", log.DefaultTimestampUTC,
 		"caller", log.DefaultCaller,
 	)

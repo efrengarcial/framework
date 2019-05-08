@@ -5,31 +5,26 @@ import (
 )
 
 type IModel interface {
-	GetId() uint64
+	GetID() uint64
 	Validate() error
 }
 
-type BaseEntity struct {
-	Id uint64     `json:"id"`
-}
-
-func (base *BaseEntity) GetId() uint64 {
-	return base.Id
-}
-
-// AbstractAuditingEntity entity
-type AbstractAuditingEntity struct {
+type Model struct {
+	ID uint64     `json:"id"`
 	CreatedDate     	string
 	CreatedBy 			time.Time
 	LastModifiedBy     	string
 	LastModifiedDate 	time.Time
 }
 
+func (base *Model) GetID() uint64 {
+	return base.ID
+}
+
 
 // User Entity
 type User struct {
-	BaseEntity
-	AbstractAuditingEntity  ` json:"-"`
+	Model
 	Login	  		string    `json:"login" validate:"required"`
 	Password  		string    `json:"password" validate:"required"`
 	FirstName 		string    `json:"firstName"`
