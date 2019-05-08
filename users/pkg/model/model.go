@@ -4,6 +4,19 @@ import (
 	"time"
 )
 
+type IModel interface {
+	GetId() uint64
+	Validate() error
+}
+
+type BaseEntity struct {
+	Id uint64     `json:"id"`
+}
+
+func (base *BaseEntity) GetId() uint64 {
+	return base.Id
+}
+
 // AbstractAuditingEntity entity
 type AbstractAuditingEntity struct {
 	CreatedDate     	string
@@ -12,10 +25,11 @@ type AbstractAuditingEntity struct {
 	LastModifiedDate 	time.Time
 }
 
+
 // User Entity
 type User struct {
-	auditing 		AbstractAuditingEntity  ` json:"-"`
-	ID        		int64     `json:"id"`
+	BaseEntity
+	AbstractAuditingEntity  ` json:"-"`
 	Login	  		string    `json:"login" validate:"required"`
 	Password  		string    `json:"password" validate:"required"`
 	FirstName 		string    `json:"firstName"`
@@ -27,6 +41,10 @@ type User struct {
 	ActivationKey  	string    ` json:"-"`
 	ResetKey  		string    ` json:"-"`
 	ResetDate  		time.Time    ` json:"-"`
+}
+
+func (user *User) Validate() error {
+	return nil
 }
 
 // Token Entity
