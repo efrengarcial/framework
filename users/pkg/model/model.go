@@ -8,6 +8,11 @@ type IModel interface {
 	GetID() uint64
 	Validate() error
 }
+
+type MultiTenantEntity interface {
+	GetTenantID() uint64
+}
+
 //BaseModel
 type Model struct {
 	ID        uint64      	`json:"id" gorm:"type:bigserial;primary_key"`
@@ -25,6 +30,7 @@ func (base *Model) GetID() uint64 {
 // User Entity
 type User struct {
 	Model
+	TenantId		uint64	  `json:"tenantId"`
 	Login	  		string    `json:"login" validate:"required"`
 	Password  		string    `json:"password" validate:"required"`
 	FirstName 		string    `json:"firstName"`
@@ -40,12 +46,23 @@ type User struct {
 }
 
 type Authority struct {
-	Name string 			`json:"name" gorm:"primary_key"`
+	ID        	uint64      	`json:"id" gorm:"type:bigserial;primary_key"`
+	Name 		string 			`json:"name" validate:"required" `
+	TenantId	uint64	  		`json:"tenantId"`
 }
 
 func (user *User) Validate() error {
 	return nil
 }
+
+func (user *User) GetTenantID() uint64 {
+	return user.TenantId
+}
+
+func (authority *Authority) GetTenantID() uint64 {
+	return authority.TenantId
+}
+
 
 // Set User's table name to be `fw_user`
 func (User) TableName() string {
@@ -63,3 +80,10 @@ type Token struct {
 	Valid     bool		`json:"valid"`
 }
 
+type Pageable struct {
+	Page    int
+	Limit   int
+	OrderBy []string
+	ShowSQL bool
+	Model 	IModel
+}

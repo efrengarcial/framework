@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/PrinceNorin/monga/models"
 	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/efrengarcial/framework/users/pkg/service"
@@ -51,19 +50,20 @@ func (gr GormRepository) FindFirst(receiver model.IModel, where string, args ...
 	return gr.DB.Where(where, args...).Limit(1).Find(receiver).Error
 }
 
-func (gr GormRepository) FindAll(models interface{}, where string, args ...interface{}) (err error){
-	err = gr.DB.Where(where, args...).Find(models).Error
+func (gr GormRepository) FindAll(result interface{}, where string, args ...interface{}) (err error){
+	err = gr.DB.Where(where, args...).Find(result).Error
 	return
 }
 
-func (gr GormRepository) FindAllPageable(page, limit int, orderBy []string, result interface{}) *pagination.Paginator {
+func (gr GormRepository) FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{} ) *pagination.Paginator {
+	gr.DB = gr.DB.Model(pageable.Model).Where(where, args)
 	p := &pagination.Param{
-		DB:      models.ORM,
-		Page:    page,
-		Limit:   limit,
-		OrderBy: orderBy,
+		DB:      gr.DB,
+		Page:    pageable.Page,
+		Limit:   pageable.Limit,
+		OrderBy: pageable.OrderBy,
 	}
-	return pagination.Paging(p, &result)
+	return pagination.Paging(p, result)
 }
 
 func (gr GormRepository) Delete(model model.IModel, where string, args ...interface{}) error {

@@ -42,16 +42,16 @@ func (_m *Repository) Find(receiver model.IModel, id uint64) error {
 	return r0
 }
 
-// FindAll provides a mock function with given fields: models, where, args
-func (_m *Repository) FindAll(models interface{}, where string, args ...interface{}) error {
+// FindAll provides a mock function with given fields: result, where, args
+func (_m *Repository) FindAll(result interface{}, where string, args ...interface{}) error {
 	var _ca []interface{}
-	_ca = append(_ca, models, where)
+	_ca = append(_ca, result, where)
 	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(interface{}, string, ...interface{}) error); ok {
-		r0 = rf(models, where, args...)
+		r0 = rf(result, where, args...)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -59,13 +59,16 @@ func (_m *Repository) FindAll(models interface{}, where string, args ...interfac
 	return r0
 }
 
-// FindAllPageable provides a mock function with given fields: page, limit, orderBy, result
-func (_m *Repository) FindAllPageable(page int, limit int, orderBy []string, result interface{}) *pagination.Paginator {
-	ret := _m.Called(page, limit, orderBy, result)
+// FindAllPageable provides a mock function with given fields: pageable, result, where, args
+func (_m *Repository) FindAllPageable(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
+	var _ca []interface{}
+	_ca = append(_ca, pageable, result, where)
+	_ca = append(_ca, args...)
+	ret := _m.Called(_ca...)
 
 	var r0 *pagination.Paginator
-	if rf, ok := ret.Get(0).(func(int, int, []string, interface{}) *pagination.Paginator); ok {
-		r0 = rf(page, limit, orderBy, result)
+	if rf, ok := ret.Get(0).(func(model.Pageable, interface{}, string, ...interface{}) *pagination.Paginator); ok {
+		r0 = rf(pageable, result, where, args...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*pagination.Paginator)
