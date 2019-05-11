@@ -27,14 +27,15 @@ func init() {
 }
 
 //https://github.com/bxcodec/go-clean-arch/blob/master/article/usecase/article_ucase_test.go
-func TestGet(t *testing.T) {
+// mockery -name=Repository
+func TestInsert(t *testing.T) {
 	mockRepository :=  new(mocks.Repository)
 
 	mockUser := &model.User {
-		FirstName: "Efren",
-		LastName: "Garcia",
-		Email: "efren.gl@gmail.com",
-		Login: "efren",
+		FirstName: "Juan",
+		LastName: "Perez",
+		Email: "juan.perez@gmail.com",
+		Login: "jperez",
 	}
 
 	t.Run("success", func(t *testing.T) {

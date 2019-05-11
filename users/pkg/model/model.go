@@ -10,17 +10,16 @@ type IModel interface {
 }
 
 type Model struct {
-	ID uint64     `json:"id"`
-	CreatedDate     	string
-	CreatedBy 			time.Time
-	LastModifiedBy     	string
-	LastModifiedDate 	time.Time
+	ID        uint64      	`json:"id" gorm:"type:bigserial;primary_key"`
+	CreatedAt time.Time 	`json:"createdAt" gorm:"type:timestamp"`
+	UpdatedAt time.Time 	`json:"updatedAt" gorm:"type:timestamp"`
+	CreatedBy string 		`json:"createdBy"`
+	LastModifiedBy string    `json:"lastModifiedBy"`
 }
 
 func (base *Model) GetID() uint64 {
 	return base.ID
 }
-
 
 // User Entity
 type User struct {
@@ -40,6 +39,11 @@ type User struct {
 
 func (user *User) Validate() error {
 	return nil
+}
+
+// Set User's table name to be `fw_users`
+func (User) TableName() string {
+	return "fw_users"
 }
 
 // Token Entity
