@@ -20,7 +20,7 @@ func (gr GormRepository) Insert(model model.IModel) (model.IModel, error){
 	if err := model.Validate(); err != nil{
 		return nil, err
 	}
-	if err := gr.DB.Create(model).Error; err != nil{
+	if err := gr.DB.Debug().Create(model).Error; err != nil{
 		return nil, err
 	}
 	return model, nil

@@ -8,13 +8,14 @@ type IModel interface {
 	GetID() uint64
 	Validate() error
 }
-
+//BaseModel
 type Model struct {
 	ID        uint64      	`json:"id" gorm:"type:bigserial;primary_key"`
 	CreatedAt time.Time 	`json:"createdAt" gorm:"type:timestamp"`
 	UpdatedAt time.Time 	`json:"updatedAt" gorm:"type:timestamp"`
 	CreatedBy string 		`json:"createdBy"`
-	LastModifiedBy string    `json:"lastModifiedBy"`
+	LastModifiedBy string   `json:"lastModifiedBy"`
+	//DeletedAt *time.Time	`json:"deletedAt"`
 }
 
 func (base *Model) GetID() uint64 {
@@ -35,15 +36,25 @@ type User struct {
 	ActivationKey  	string    ` json:"-"`
 	ResetKey  		string    ` json:"-"`
 	ResetDate  		time.Time    ` json:"-"`
+	Authorities     []Authority `gorm:"many2many:fw_user_authority;"`
+}
+
+type Authority struct {
+	Name string 			`json:"name" gorm:"primary_key"`
 }
 
 func (user *User) Validate() error {
 	return nil
 }
 
-// Set User's table name to be `fw_users`
+// Set User's table name to be `fw_user`
 func (User) TableName() string {
-	return "fw_users"
+	return "fw_user"
+}
+
+// Set User's table name to be `fw_authority`
+func (Authority) TableName() string {
+	return "fw_authority"
 }
 
 // Token Entity
