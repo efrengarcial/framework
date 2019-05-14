@@ -42,16 +42,26 @@ type User struct {
 	ActivationKey  	string    ` json:"-"`
 	ResetKey  		string    ` json:"-"`
 	ResetDate  		time.Time    ` json:"-"`
-	Authorities     []Authority `gorm:"many2many:fw_user_authority;"`
+	Authorities     []Authority `gorm:"many2many:fw_user_authority;association_autoupdate:false;association_autocreate:false"`
 }
 
 type Authority struct {
-	ID        	uint64      	`json:"id" gorm:"type:bigserial;primary_key"`
+	Model
 	Name 		string 			`json:"name" validate:"required" `
 	TenantId	uint64	  		`json:"tenantId"`
+	Privileges  []Privilege `gorm:"many2many:fw_authority_privilege;association_autoupdate:false;association_autocreate:false"`
+}
+
+
+type Privilege struct {
+	Name string 			`json:"name" gorm:"primary_key"`
 }
 
 func (user *User) Validate() error {
+	return nil
+}
+
+func (authority *Authority) Validate() error {
 	return nil
 }
 
@@ -72,6 +82,11 @@ func (User) TableName() string {
 // Set User's table name to be `fw_authority`
 func (Authority) TableName() string {
 	return "fw_authority"
+}
+
+// Set User's table name to be `fw_authority`
+func (Privilege) TableName() string {
+	return "fw_privilege"
 }
 
 // Token Entity

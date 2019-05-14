@@ -31,11 +31,14 @@ func init() {
 func TestInsert(t *testing.T) {
 	mockRepository :=  new(mocks.Repository)
 
+	mockAuthority := model.Authority{Model: model.Model{ID: 1}}
+
 	mockUser := &model.User {
 		FirstName: "Juan",
 		LastName: "Perez",
 		Email: "juan.perez@gmail.com",
 		Login: "jperez",
+		Authorities: []model.Authority{ mockAuthority },
 	}
 
 	t.Run("success", func(t *testing.T) {

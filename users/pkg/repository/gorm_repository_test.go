@@ -55,7 +55,6 @@ func Test_repository_Create(t *testing.T) {
 
 	var ( id  uint64  = 1
 		 tenantId  uint64  = 10
-		 roleAdmin = "ROLE_ADMIN"
 		 )
 	db, mock, err := sqlmock.New()
 	defer db.Close()
@@ -66,9 +65,8 @@ func Test_repository_Create(t *testing.T) {
 	DB.LogMode(true)
 	repository := NewGormRepository(DB)
 
-	user := &model.User{ Model : model.Model{LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
-		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk" ,
-		Authorities: []model.Authority{ {Name: roleAdmin , TenantId:tenantId} }}
+	user := &model.User{ Model : model.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
 		`INSERT INTO "fw_user" `)).
@@ -77,9 +75,50 @@ func Test_repository_Create(t *testing.T) {
 		WillReturnRows(
 			sqlmock.NewRows([]string{"id"}).AddRow(id))
 
+	newUser , err := repository.Insert(user)
+	log.Println(newUser.GetID())
+
+	assert.NoError(t, err)
+	assert.NotNil(t, newUser)
+}
+
+func Test_repository_Create_ExistingAuthority(t *testing.T) {
+
+	var ( id  uint64  = 1
+		tenantId  uint64  = 10
+		roleAdmin = "ROLE_ADMIN"
+	)
+	db, mock, err := sqlmock.New()
+	defer db.Close()
+	require.NoError(t, err)
+	DB , err := gorm.Open("postgres", db)
+	defer DB.Close()
+	require.NoError(t, err)
+	DB.LogMode(true)
+	repository := NewGormRepository(DB)
+
+	authority := model.Authority{Model : model.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
+
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "fw_authority"  `)).
-		WithArgs(roleAdmin, tenantId).WillReturnRows(
+		WithArgs(AnyTime{}, AnyTime{}, authority.CreatedBy, authority.LastModifiedBy, roleAdmin, tenantId).WillReturnRows(
 		sqlmock.NewRows([]string{"id"}).AddRow(id))
+
+	repository.Insert(&authority)
+
+	existAuthority :=  model.Authority{Model : model.Model{ID: id}}
+
+	user := &model.User{ Model : model.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk" ,
+		Authorities: []model.Authority{ existAuthority }}
+
+	mock.ExpectQuery( regexp.QuoteMeta(
+		`INSERT INTO "fw_user" `)).
+		WithArgs(AnyTime{}, AnyTime{}, user.CreatedBy, user.LastModifiedBy, user.TenantId, user.Login, user.Password, user.FirstName,
+			user.LastName, user.Email, user.Activated, user.LangKey, user.ImageUrl, user.ActivationKey, user.ResetKey, AnyTime{}).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id"}).AddRow(id))
+
+
 
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "fw_user_authority"  `)).
 		WithArgs(id, id, id, id).WillReturnResult(sqlmock.NewResult(1, 1))
@@ -104,7 +143,7 @@ func Test_repository_Save(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := NewGormRepository(DB)
-	user := &model.User{ Model : model.Model{LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
+	user := &model.User{ Model : model.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	sql := regexp.QuoteMeta(

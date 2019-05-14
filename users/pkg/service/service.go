@@ -63,7 +63,7 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 	newUser, err  := service.repository.Insert(user)
 	if  err == nil {
 		level.Error(logger).Log("err", err)
-		return nil,errors.Wrap(InvalidCostError(1), ErrCmdRepository.Error()) // ErrCmdRepository
+		return nil,errors.Wrap(err, ErrCmdRepository.Error()) // ErrCmdRepository
 		//return nil, ErrCmdRepository
 	}
 
