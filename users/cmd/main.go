@@ -8,6 +8,8 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/efrengarcial/framework/users/pkg/transport"
 	"github.com/go-kit/kit/log"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,9 +18,10 @@ import (
 
 const (
 	defaultPort              = "8080"
-	defaultRoutingServiceURL = "http://localhost:7878"
-	defaultMongoDBURL        = "127.0.0.1"
-	defaultDBName            = "dddsample"
+	defaultPostresDBHost        = "127.0.0.1"
+	defaultDBNme            = "db"
+	defaultDBUser            = "postgres"
+	defaultDBPassword            = "dbpwd"
 )
 
 func main() {
@@ -87,4 +90,21 @@ func envString(env, fallback string) string {
 		return fallback
 	}
 	return e
+}
+
+func CreateConnection() (*gorm.DB, error) {
+
+	// Get database details from environment variables
+	host := envString("DB_HOST", defaultPostresDBHost )
+	user :=  envString("DB_USER", defaultDBUser)
+	DBName := envString("DB_NAME", defaultDBNme)
+	password := envString("DB_PASSWORD", defaultDBPassword)
+
+	return gorm.Open(
+		"postgres",
+		fmt.Sprintf(
+			"host=%s user=%s dbname=%s sslmode=disable password=%s",
+			host, user, DBName, password,
+		),
+	)
 }
