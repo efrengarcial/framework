@@ -8,8 +8,10 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/efrengarcial/framework/users/pkg/transport"
 	"github.com/go-kit/kit/log"
+	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"os"
 	"os/signal"
@@ -63,9 +65,25 @@ func main() {
 	// Setup repositories
 	repo := repository.NewGormRepository(db)
 
-	service := service.NewService(repo, log.With(logger, "component", "users"))
+	fieldKeys := []string{"method"}
+	us := service.NewService(repo, log.With(logger, "component", "users"))
+	us = service.NewInstrumentingService(
+		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
+			Namespace: "api",
+			Subsystem: "user_service",
+			Name:      "request_count",
+			Help:      "Number of requests received.",
+		}, fieldKeys),
+		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
+			Namespace: "api",
+			Subsystem: "user_service",
+			Name:      "request_latency_microseconds",
+			Help:      "Total duration of requests in microseconds.",
+		}, fieldKeys),
+		us,
+	)
 
-	srv := transport.New(service, log.With(logger, "component", "http"))
+	srv := transport.New(us, log.With(logger, "component", "http"))
 
 	errs := make(chan error, 2)
 	go func() {
