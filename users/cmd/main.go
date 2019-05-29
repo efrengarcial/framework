@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	defaultPort              = "8080"
-	defaultPostresDBHost        = "127.0.0.1"
-	defaultDBNme            = "db"
-	defaultDBUser            = "postgres"
-	defaultDBPassword            = "dbpwd"
+	defaultPort       = "8080"
+	defaultDBHost     = "127.0.0.1"
+	defaultDBNme      = "db"
+	defaultDBUser     = "postgres"
+	defaultDBPassword = "dbpwd"
 )
 
 func main() {
@@ -113,7 +113,7 @@ func envString(env, fallback string) string {
 func CreateConnection() (*gorm.DB, error) {
 
 	// Get database details from environment variables
-	host := envString("DB_HOST", defaultPostresDBHost )
+	host := envString("DB_HOST", defaultDBHost)
 	user :=  envString("DB_USER", defaultDBUser)
 	DBName := envString("DB_NAME", defaultDBNme)
 	password := envString("DB_PASSWORD", defaultDBPassword)
