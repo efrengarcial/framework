@@ -18,21 +18,21 @@ var (
 )
 
 
-// UsersService describes the service.
-type UsersService interface {
+// UserService describes the service.
+type UserService interface {
 	Create(ctx context.Context, req *model.User) (*model.User, error)
 }
 
 
-// service implements the Order Service
+// service implements the User Service
 type userService struct {
 	repository Repository
 	logger     log.Logger
 }
 
 
-// NewService creates and returns a new Order service instance
-func NewService(rep Repository, logger log.Logger) UsersService {
+// NewService creates and returns a new User service instance
+func NewService(rep Repository, logger log.Logger) UserService {
 	return &userService {
 		repository: rep,
 		logger:     logger,

@@ -12,7 +12,7 @@ import (
 )
 
 type userHandler struct {
-	service service.UsersService
+	service service.UserService
 	logger  kitlog.Logger
 }
 

@@ -6,15 +6,15 @@ import (
 )
 
 // Middleware describes a service middleware.
-type Middleware func(UsersService) UsersService
+type Middleware func(UserService) UserService
 
 type authMiddleware struct {
-	next UsersService
+	next UserService
 }
 
-// AuthMiddleware returns a UsersService Middleware.
+// AuthMiddleware returns a UserService Middleware.
 func AuthMiddleware() Middleware {
-	return func(next UsersService) UsersService {
+	return func(next UserService) UserService {
 		return &authMiddleware{next}
 	}
 

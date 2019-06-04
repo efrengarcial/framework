@@ -11,11 +11,11 @@ import (
 type instrumentingService struct {
 	requestCount   metrics.Counter
 	requestLatency metrics.Histogram
-	next           UsersService
+	next           UserService
 }
 
 // NewInstrumentingService returns an instance of an instrumenting Service.
-func NewInstrumentingService(counter metrics.Counter, latency metrics.Histogram, s UsersService) UsersService {
+func NewInstrumentingService(counter metrics.Counter, latency metrics.Histogram, s UserService) UserService {
 	return &instrumentingService{
 		requestCount:   counter,
 		requestLatency: latency,

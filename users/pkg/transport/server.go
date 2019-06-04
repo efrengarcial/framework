@@ -10,7 +10,7 @@ import (
 
 // Server holds the dependencies for a HTTP server.
 type Server struct {
-	UserService service.UsersService
+	UserService service.UserService
 
 	Logger kitlog.Logger
 
@@ -18,7 +18,7 @@ type Server struct {
 }
 
 // New returns a new HTTP server.
-func New(us service.UsersService,logger kitlog.Logger) *Server {
+func New(us service.UserService,logger kitlog.Logger) *Server {
 	s := &Server{
 		UserService:  us,
 		Logger:   logger,

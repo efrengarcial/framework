@@ -57,6 +57,12 @@ type Privilege struct {
 	Name string 			`json:"name" gorm:"primary_key"`
 }
 
+// Token Entity
+type Token struct {
+	Token     string    `json:"token" validate:"required"`
+	Valid     bool		`json:"valid"`
+}
+
 func (user *User) Validate() error {
 	return nil
 }
@@ -87,12 +93,6 @@ func (Authority) TableName() string {
 // Set User's table name to be `fw_authority`
 func (Privilege) TableName() string {
 	return "fw_privilege"
-}
-
-// Token Entity
-type Token struct {
-	Token     string    `json:"token" validate:"required"`
-	Valid     bool		`json:"valid"`
 }
 
 type Pageable struct {
