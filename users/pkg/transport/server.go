@@ -32,14 +32,10 @@ func New(us service.UserService,as service.AuthService, logger kitlog.Logger) *S
 	r.Route("/api", func(r chi.Router) {
 		h := userHandler{s.UserService, s.Logger}
 		r.Mount("/v1", h.router())
-	})
 
-	r.Route("/api", func(r chi.Router) {
-		h := authHandler{s.AuthService, s.Logger}
-		r.Mount("/", h.router())
+		a := authHandler{s.AuthService, s.Logger}
+		r.Mount("/authenticate", a.router())
 	})
-
-	r.Mount("/login", adminRouter())
 
 	s.router = r
 

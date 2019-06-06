@@ -3,14 +3,17 @@ package repository
 import (
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/efrengarcial/framework/users/pkg/service"
+	"github.com/jinzhu/gorm"
 )
 
 type UserGormRepository struct {
 	GormRepository
 }
 
-func NewUserGormRepository(repository GormRepository) service.UserRepository {
-	return UserGormRepository{repository}
+func NewUserGormRepository(db *gorm.DB) service.UserRepository {
+
+	repo := GormRepository{db}
+	return &UserGormRepository{repo}
 }
 
 func (repo *UserGormRepository) GetByEmail(email string) (*model.User, error) {

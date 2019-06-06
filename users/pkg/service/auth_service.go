@@ -10,9 +10,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type LoginVM struct {
+	UserName    string `json:"username"`
+	Password 	string `json:"password"`
+	RememberMe 	bool `json:"rememberMe"`
+}
+
+
 // AuthService has the logic authentication
 type AuthService interface {
-	Auth(ctx context.Context, req *model.User, res *model.Token) error
+	Auth(ctx context.Context, req *LoginVM, res *model.Token) error
 	ValidateToken(ctx context.Context, req *model.Token, res *model.Token) error
 }
 
@@ -22,7 +29,7 @@ type authService struct {
 	logger     log.Logger
 }
 
-// NewService creates and returns a new User service instance
+// NewService creates and returns a new Auth service instance
 func NewAuthService(rep UserRepository, token TokenService, logger log.Logger) AuthService {
 	return &authService {
 		repo: rep,
@@ -31,9 +38,9 @@ func NewAuthService(rep UserRepository, token TokenService, logger log.Logger) A
 	}
 }
 
-func (service *authService) Auth(ctx context.Context, req *model.User, res *model.Token) error {
-	logger := log.With(service.logger, "method", "Auth")
-	user, err := service.repo.GetByEmail(req.Email)
+func (service *authService) Auth(ctx context.Context, req *LoginVM, res *model.Token) error {
+	logger := log.With(service.logger, "method", "LoginVM")
+	user, err := service.repo.GetByEmail(req.UserName)
 	if err != nil {
 		level.Error(logger).Log("err", err)
 		return err

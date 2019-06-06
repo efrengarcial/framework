@@ -31,6 +31,11 @@ type TokenService interface {
 type tokenService struct {
 }
 
+// NewService creates and returns a new Token service instance
+func NewTokenService() TokenService {
+	return &tokenService {}
+}
+
 // Decode a token string into a token object
 func (srv *tokenService) Decode(tokenString string) (*CustomClaims, error) {
 

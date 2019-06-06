@@ -2,11 +2,13 @@ package transport
 
 import (
 	"encoding/json"
+	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
 	"net/http"
 )
+
 
 type authHandler struct {
 	service service.AuthService
@@ -15,25 +17,35 @@ type authHandler struct {
 
 func (h *authHandler) router() http.Handler  {
 	r := chi.NewRouter()
-	r.Post("/authenticate", h.signIn)
+	r.Post("/", h.signIn)
 	return r
 }
 
 func (h *authHandler) signIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var data = new(struct {
-		UserName    string `json:"username"`
-		Password 	string `json:"password"`
-		RememberMe 	bool `json:"rememberMe"`
-	})
+	loginVM := new(service.LoginVM)
 
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&loginVM); err != nil {
 		h.logger.Log("error", err)
 		encodeError(ctx, err, w)
 		return
 	}
 
-	h.service.Auth(ctx, )
+	token:= new(model.Token)
+	err := h.service.Auth(ctx, loginVM, token)
+
+	if err != nil {
+		encodeError(ctx, err, w)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(token); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
+	}
+
 }
 

@@ -82,8 +82,11 @@ func main() {
 		}, fieldKeys),
 		us,
 	)
+	ts := service.NewTokenService()
+	userRepository := repository.NewUserGormRepository(db)
+	as := service.NewAuthService(userRepository, ts, log.With(logger, "component", "auth"))
 
-	srv := transport.New(us, log.With(logger, "component", "http"))
+	srv := transport.New(us, as, log.With(logger, "component", "http"))
 
 	errs := make(chan error, 2)
 	go func() {
