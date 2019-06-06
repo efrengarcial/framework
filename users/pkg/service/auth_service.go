@@ -4,47 +4,61 @@ package service
 import (
 	"context"
 	"github.com/efrengarcial/framework/users/pkg/model"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 )
 
 // AuthService has the logic authentication
 type AuthService interface {
-	Auth(ctx context.Context, in *model.User) (*model.Token, error)
-	ValidateToken(ctx context.Context, in *model.Token) (*model.Token, error)
+	Auth(ctx context.Context, req *model.User, res *model.Token) error
+	ValidateToken(ctx context.Context, req *model.Token, res *model.Token) error
 }
 
 type authService struct {
-	repo         Repository
+	repo         UserRepository
 	tokenService TokenService
+	logger     log.Logger
 }
 
-func (srv *authService) Auth(ctx context.Context, req *model.User, res *model.Token) error {
-	log.Println("Logging in with:", req.Email, req.Password)
-	user, err := srv.repo.GetByEmail(req.Email)
-	log.Println(user, err)
+// NewService creates and returns a new User service instance
+func NewAuthService(rep UserRepository, token TokenService, logger log.Logger) AuthService {
+	return &authService {
+		repo: rep,
+		tokenService: token,
+		logger:     logger,
+	}
+}
+
+func (service *authService) Auth(ctx context.Context, req *model.User, res *model.Token) error {
+	logger := log.With(service.logger, "method", "Auth")
+	user, err := service.repo.GetByEmail(req.Email)
 	if err != nil {
+		level.Error(logger).Log("err", err)
 		return err
 	}
 
 	// Compares our given password against the hashed password
 	// stored in the database
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		level.Error(logger).Log("err", err)
 		return err
 	}
 
-	token, err := srv.tokenService.Encode(user)
+	token, err := service.tokenService.Encode(user)
 	if err != nil {
+		level.Error(logger).Log("err", err)
 		return err
 	}
 	res.Token = token
 	return nil
 }
 
-func (srv *authService) ValidateToken(ctx context.Context, req *model.Token, res *model.Token) error {
+func (service *authService) ValidateToken(ctx context.Context, req *model.Token, res *model.Token) error {
 
 	// Decode token
-	claims, err := srv.tokenService.Decode(req.Token)
+	claims, err := service.tokenService.Decode(req.Token)
 
 	if err != nil {
 		return err

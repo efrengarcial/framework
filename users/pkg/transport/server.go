@@ -4,13 +4,13 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 )
 
 // Server holds the dependencies for a HTTP server.
 type Server struct {
 	UserService service.UserService
+	AuthService service.AuthService
 
 	Logger kitlog.Logger
 
@@ -18,9 +18,10 @@ type Server struct {
 }
 
 // New returns a new HTTP server.
-func New(us service.UserService,logger kitlog.Logger) *Server {
+func New(us service.UserService,as service.AuthService, logger kitlog.Logger) *Server {
 	s := &Server{
 		UserService:  us,
+		AuthService: as,
 		Logger:   logger,
 	}
 
@@ -33,7 +34,12 @@ func New(us service.UserService,logger kitlog.Logger) *Server {
 		r.Mount("/v1", h.router())
 	})
 
-	r.Method("GET", "/metrics", promhttp.Handler())
+	r.Route("/api", func(r chi.Router) {
+		h := authHandler{s.AuthService, s.Logger}
+		r.Mount("/", h.router())
+	})
+
+	r.Mount("/login", adminRouter())
 
 	s.router = r
 
