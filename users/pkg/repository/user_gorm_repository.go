@@ -25,3 +25,12 @@ func (repo *UserGormRepository) GetByEmail(email string) (*model.User, error) {
 	return user, nil
 }
 
+func (repo *UserGormRepository) GetByLogin(login string) (*model.User, error) {
+	user := &model.User{}
+	if err := repo.DB.Where("login = ?", login).
+		First(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+

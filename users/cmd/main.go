@@ -121,11 +121,14 @@ func CreateConnection() (*gorm.DB, error) {
 	DBName := envString("DB_NAME", defaultDBNme)
 	password := envString("DB_PASSWORD", defaultDBPassword)
 
-	return gorm.Open(
+	db , err :=  gorm.Open(
 		"postgres",
 		fmt.Sprintf(
 			"host=%s user=%s dbname=%s sslmode=disable password=%s",
 			host, user, DBName, password,
 		),
 	)
+	db.LogMode(true)
+
+	return db, err
 }

@@ -1,11 +1,9 @@
 package service
 
-
 import (
 	"context"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -39,23 +37,19 @@ func NewAuthService(rep UserRepository, token TokenService, logger log.Logger) A
 }
 
 func (service *authService) Auth(ctx context.Context, req *LoginVM, res *model.Token) error {
-	logger := log.With(service.logger, "method", "LoginVM")
-	user, err := service.repo.GetByEmail(req.UserName)
+	user, err := service.repo.GetByLogin(req.UserName)
 	if err != nil {
-		level.Error(logger).Log("err", err)
 		return err
 	}
 
 	// Compares our given password against the hashed password
 	// stored in the database
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		level.Error(logger).Log("err", err)
 		return err
 	}
 
 	token, err := service.tokenService.Encode(user)
 	if err != nil {
-		level.Error(logger).Log("err", err)
 		return err
 	}
 	res.Token = token

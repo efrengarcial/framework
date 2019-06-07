@@ -15,6 +15,7 @@ var (
 	ErrHashingPassword = errors.New("error hashing password")
 	ErrCmdRepository   = errors.New("unable to command repository")
 	ErrQueryRepository = errors.New("unable to query repository")
+	ErrQueryRepository = errors.New("unable to query repository")
 )
 
 
@@ -43,6 +44,10 @@ func NewService(rep Repository, logger log.Logger) UserService {
 //https://medium.com/@hussachai/error-handling-in-go-a-quick-opinionated-guide-9199dd7c7f76
 func (service *userService) Create(ctx context.Context, user *model.User) (*model.User, error) {
 	logger := log.With(service.logger, "method", "Create")
+	if user.ID == 0 {
+		return nil, ErrHashingPassword
+	}
+
 	if len(user.LangKey) ==0 {
 		user.LangKey = "en"
 	}
@@ -73,5 +78,6 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 type InvalidCostError int
 
 func (ic InvalidCostError) Error() string {
-	return fmt.Sprintf("crypto/bcrypt: cost %d is outside allowed range", int(ic))
+	return fmt.Sprintf("crypto/bcrypt: cost %d is outside allowed range", int(
+		))
 }
