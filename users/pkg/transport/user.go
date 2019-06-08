@@ -59,15 +59,19 @@ func (h *userHandler) createUser(w http.ResponseWriter, r *http.Request) {
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	var status int
 	switch err {
 	//case shipping.ErrUnknownCargo:
 	//	w.WriteHeader(http.StatusNotFound)
 	case tracking.ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)
+		status = http.StatusBadRequest
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
+		status = http.StatusInternalServerError
 	}
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"error": err.Error(),
+		"message": err.Error(),
+		"status" : status,
 	})
 }

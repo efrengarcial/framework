@@ -12,10 +12,12 @@ import (
 )
 
 var (
+	ErrInvalidArgument = errors.New("invalid argument")
 	ErrHashingPassword = errors.New("error hashing password")
 	ErrCmdRepository   = errors.New("unable to command repository")
 	ErrQueryRepository = errors.New("unable to query repository")
-	ErrQueryRepository = errors.New("unable to query repository")
+	ErrLoginAlreadyUsed= errors.New("login name already used")
+	ErrEmailAlreadyUsed= errors.New("email is already in use")
 )
 
 
@@ -78,6 +80,7 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 type InvalidCostError int
 
 func (ic InvalidCostError) Error() string {
-	return fmt.Sprintf("crypto/bcrypt: cost %d is outside allowed range", int(
-		))
+	return fmt.Sprintf("crypto/bcrypt: cost %d is outside allowed range", int(ic))
 }
+
+//return InvalidCostError(cost)
