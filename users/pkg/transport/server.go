@@ -1,8 +1,11 @@
 package transport
 
 import (
+	"context"
+	"encoding/json"
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
+	"github.com/go-kit/kit/examples/shipping/tracking"
 	kitlog "github.com/go-kit/kit/log"
 	"net/http"
 )
@@ -57,5 +60,25 @@ func accessControl(h http.Handler) http.Handler {
 		}
 
 		h.ServeHTTP(w, r)
+	})
+}
+
+
+func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	var status int
+	switch err {
+	//case shipping.ErrUnknownCargo:
+	//	w.WriteHeader(http.StatusNotFound)
+	case tracking.ErrInvalidArgument:
+		w.WriteHeader(http.StatusBadRequest)
+		status = http.StatusBadRequest
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+		status = http.StatusInternalServerError
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": err.Error(),
+		"status" : status,
 	})
 }

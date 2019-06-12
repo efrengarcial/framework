@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/efrengarcial/framework/users/pkg/model"
+	"github.com/efrengarcial/framework/users/pkg/db"
 	"github.com/efrengarcial/framework/users/pkg/repository"
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/efrengarcial/framework/users/pkg/transport"
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"net/http"
@@ -46,21 +45,18 @@ func main() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-
+	host := envString("DB_HOST", defaultDBHost)
+	user :=  envString("DB_USER", defaultDBUser)
+	DBName := envString("DB_NAME", defaultDBNme)
+	password := envString("DB_PASSWORD", defaultDBPassword)
 	// Creates a database connection and handles
 	// closing it again before exit.
-	db, err := CreateConnection()
+	db := db.CreateConnection("postgres",
+		fmt.Sprintf(
+			"host=%s user=%s dbname=%s sslmode=disable password=%s",
+			host, user, DBName, password))
+
 	defer db.Close()
-
-	if err != nil {
-		panic(err)
-	}
-
-	// Automatically migrates the user struct
-	// into database columns/types etc. This will
-	// check for changes and migrate them each time
-	// this service is restarted.
-	db.AutoMigrate(&model.User{}, &model.Authority{}, &model.Privilege{})
 
 	// Setup repositories
 	repo := repository.NewGormRepository(db)
@@ -83,8 +79,8 @@ func main() {
 		us,
 	)
 	ts := service.NewTokenService()
-	userRepository := repository.NewUserGormRepository(db)
-	as := service.NewAuthService(userRepository, ts, log.With(logger, "component", "auth"))
+	ur := repository.NewUserGormRepository(db)
+	as := service.NewAuthService(ur, ts, log.With(logger, "component", "auth"))
 
 	srv := transport.New(us, as, log.With(logger, "component", "http"))
 
@@ -111,24 +107,4 @@ func envString(env, fallback string) string {
 		return fallback
 	}
 	return e
-}
-
-func CreateConnection() (*gorm.DB, error) {
-
-	// Get database details from environment variables
-	host := envString("DB_HOST", defaultDBHost)
-	user :=  envString("DB_USER", defaultDBUser)
-	DBName := envString("DB_NAME", defaultDBNme)
-	password := envString("DB_PASSWORD", defaultDBPassword)
-
-	db , err :=  gorm.Open(
-		"postgres",
-		fmt.Sprintf(
-			"host=%s user=%s dbname=%s sslmode=disable password=%s",
-			host, user, DBName, password,
-		),
-	)
-	db.LogMode(true)
-
-	return db, err
 }

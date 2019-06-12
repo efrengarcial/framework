@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -47,7 +46,7 @@ func NewService(rep Repository, logger log.Logger) UserService {
 func (service *userService) Create(ctx context.Context, user *model.User) (*model.User, error) {
 	logger := log.With(service.logger, "method", "Create")
 	if user.ID == 0 {
-		return nil, ErrHashingPassword
+		return nil, ErrBadRequest{Message:"A new user cannot already have an ID", Key: "app.userManagement.idexists"}
 	}
 
 	if len(user.LangKey) ==0 {
@@ -77,10 +76,21 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 	return newUser.(*model.User), nil
 }
 
-type InvalidCostError int
-
-func (ic InvalidCostError) Error() string {
-	return fmt.Sprintf("crypto/bcrypt: cost %d is outside allowed range", int(ic))
+type errorWithKey interface {
+	GetKeyMessage() string
 }
 
-//return InvalidCostError(cost)
+
+type ErrBadRequest struct {
+	Message string
+	Key string
+}
+
+func (e ErrBadRequest) GetKeyMessage() string {
+	return e.Key
+}
+
+func (e ErrBadRequest) Error() string {
+	return e.Message
+}
+
