@@ -35,7 +35,7 @@ func TestCreateHandler(t *testing.T) {
 	us := service.NewService(repo, log.With(logger, "component", "users"))
 	handler := userHandler{us, logger}
 
-	var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
+	var jsonStr = []byte(`{"id":"1"}`)
 	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)

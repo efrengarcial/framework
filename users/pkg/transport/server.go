@@ -3,6 +3,7 @@ package transport
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
@@ -62,8 +63,8 @@ func accessControl(h http.Handler) http.Handler {
 	})
 }
 
-type badRequest interface {
-	BadRequest() string
+type getKeyMessage interface {
+	GetKeyMessage() string
 }
 
 
@@ -72,9 +73,11 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	var status int
 
 	switch err.(type) {
-	case badRequest:
+	case *service.ErrBadRequest:
 		w.WriteHeader(http.StatusBadRequest)
 		status = http.StatusBadRequest
+		key, _ := err.(getKeyMessage)
+		fmt.Println(key.GetKeyMessage())
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		status = http.StatusInternalServerError

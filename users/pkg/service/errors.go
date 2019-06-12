@@ -6,7 +6,7 @@ type ErrBadRequest struct {
 	Key string
 }
 
-func (e *ErrBadRequest) BadRequest () string {
+func (e *ErrBadRequest) GetKeyMessage() string {
 	return e.Key
 }
 

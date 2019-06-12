@@ -15,7 +15,7 @@ type MultiTenantEntity interface {
 
 //BaseModel
 type Model struct {
-	ID        uint64      	`json:"id" gorm:"type:bigserial;primary_key"`
+	ID        uint64      	`json:"id,string" gorm:"type:bigserial;primary_key"`
 	CreatedAt time.Time 	`json:"createdAt" gorm:"type:timestamp"`
 	UpdatedAt time.Time 	`json:"updatedAt" gorm:"type:timestamp"`
 	CreatedBy string 		`json:"createdBy"`
