@@ -49,6 +49,7 @@ func (h *userHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		h.logger.Log("error", err)
 		encodeError(ctx, err, w)

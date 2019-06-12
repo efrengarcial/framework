@@ -8,7 +8,6 @@ require (
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/biezhi/gorm-paginator/pagination v0.0.0-20190124091837-7a5c8ed20334
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/efrengarcial/shipping v0.0.0-20190427122916-396ace35493a
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-kit/kit v0.8.0
 	github.com/go-test/deep v1.0.1

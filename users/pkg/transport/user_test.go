@@ -16,7 +16,7 @@ import (
 
 func setup() *gorm.DB {
 	// Initialize an in-memory database for full integration testing.
-	return  db.CreateConnection("sqlite3", ":memory:")
+	return  db.Initialize("sqlite3", ":memory:")
 }
 
 func teardown(db *gorm.DB ) {

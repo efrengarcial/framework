@@ -45,8 +45,8 @@ func NewService(rep Repository, logger log.Logger) UserService {
 //https://medium.com/@hussachai/error-handling-in-go-a-quick-opinionated-guide-9199dd7c7f76
 func (service *userService) Create(ctx context.Context, user *model.User) (*model.User, error) {
 	logger := log.With(service.logger, "method", "Create")
-	if user.ID == 0 {
-		return nil, ErrBadRequest{Message:"A new user cannot already have an ID", Key: "app.userManagement.idexists"}
+	if user.ID > 0 {
+		return nil, &ErrBadRequest{Message:"A new user cannot already have an ID", Key: "app.userManagement.idexists"}
 	}
 
 	if len(user.LangKey) ==0 {
@@ -76,21 +76,4 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 	return newUser.(*model.User), nil
 }
 
-type errorWithKey interface {
-	GetKeyMessage() string
-}
-
-
-type ErrBadRequest struct {
-	Message string
-	Key string
-}
-
-func (e ErrBadRequest) GetKeyMessage() string {
-	return e.Key
-}
-
-func (e ErrBadRequest) Error() string {
-	return e.Message
-}
 

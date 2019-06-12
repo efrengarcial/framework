@@ -51,7 +51,7 @@ func main() {
 	password := envString("DB_PASSWORD", defaultDBPassword)
 	// Creates a database connection and handles
 	// closing it again before exit.
-	db := db.CreateConnection("postgres",
+	db := db.Initialize("postgres",
 		fmt.Sprintf(
 			"host=%s user=%s dbname=%s sslmode=disable password=%s",
 			host, user, DBName, password))

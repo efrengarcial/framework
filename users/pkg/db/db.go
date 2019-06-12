@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func CreateConnection(dbDriver string, dbURI string) *gorm.DB {
+func Initialize(dbDriver string, dbURI string) *gorm.DB {
 
 	// Get database details from environment variables
 	db, err := gorm.Open(dbDriver, dbURI)
