@@ -4,19 +4,9 @@ import (
 	"context"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
-	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
-)
-
-var (
-	ErrInvalidArgument = errors.New("invalid argument")
-	ErrHashingPassword = errors.New("error hashing password")
-	ErrCmdRepository   = errors.New("unable to command repository")
-	ErrQueryRepository = errors.New("unable to query repository")
-	ErrLoginAlreadyUsed= errors.New("login name already used")
-	ErrEmailAlreadyUsed= errors.New("email is already in use")
 )
 
 
@@ -28,13 +18,13 @@ type UserService interface {
 
 // service implements the User Service
 type userService struct {
-	repository Repository
+	repository UserRepository
 	logger     log.Logger
 }
 
 
 // NewService creates and returns a new User service instance
-func NewService(rep Repository, logger log.Logger) UserService {
+func NewService(rep UserRepository, logger log.Logger) UserService {
 	return &userService {
 		repository: rep,
 		logger:     logger,
@@ -44,10 +34,19 @@ func NewService(rep Repository, logger log.Logger) UserService {
 //https://github.com/pkg/errors
 //https://medium.com/@hussachai/error-handling-in-go-a-quick-opinionated-guide-9199dd7c7f76
 func (service *userService) Create(ctx context.Context, user *model.User) (*model.User, error) {
-	logger := log.With(service.logger, "method", "Create")
+	var  (
+		err error
+		foundUser *model.User
+	)
+
 	if user.ID > 0 {
-		return nil, &ErrBadRequest{Message:"A new user cannot already have an ID", Key: "app.userManagement.idexists"}
+		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement.idexists")
 	}
+
+	if  foundUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); err == nil && foundUser != nil {
+		return nil, NewErrLoginAlreadyUsed("Nombre de inicio de sesión ya usado!", "userManagement.userexists")
+	}
+	if err != nil { return nil, err}
 
 	if len(user.LangKey) ==0 {
 		user.LangKey = "en"
@@ -56,10 +55,8 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 	// Generates a hashed version of our password
 	randomPassword, _ := GeneratePassword()
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)
-	if err != nil {
-		level.Error(logger).Log("err", err)
-		return nil,errors.Wrap(err, ErrHashingPassword.Error()) // ErrHashingPassword
-	}
+	if err != nil { return nil, err}
+
 	user.Password = string(hashedPass)
 	resetKey, _ := GenerateResetKey()
 	user.ResetKey = resetKey
@@ -67,11 +64,8 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 	user.Activated = true
 
 	newUser, err  := service.repository.Insert(user)
-	if  err != nil {
-		level.Error(logger).Log("err", err)
-		return nil,errors.Wrap(err, ErrCmdRepository.Error()) // ErrCmdRepository
-		//return nil, ErrCmdRepository
-	}
+	if err != nil { return nil, err}
+
 
 	return newUser.(*model.User), nil
 }

@@ -31,11 +31,12 @@ func TestCreateHandler(t *testing.T) {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	repo := repository.NewGormRepository(db)
+	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, log.With(logger, "component", "users"))
+	us = service.NewLoggingService(logger, us)
 	handler := userHandler{us, logger}
 
-	var jsonStr = []byte(`{"id":"1"}`)
+	var jsonStr = []byte(`{"id" :"1" ,"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
 	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)

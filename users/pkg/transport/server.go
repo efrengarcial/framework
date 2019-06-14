@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/efrengarcial/framework/users/pkg/service"
+	. "github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
+	"log"
 	"net/http"
 )
 
 // Server holds the dependencies for a HTTP server.
 type Server struct {
-	UserService service.UserService
-	AuthService service.AuthService
+	UserService UserService
+	AuthService AuthService
 
 	Logger kitlog.Logger
 
@@ -21,7 +22,7 @@ type Server struct {
 }
 
 // New returns a new HTTP server.
-func New(us service.UserService,as service.AuthService, logger kitlog.Logger) *Server {
+func New(us UserService,as AuthService, logger kitlog.Logger) *Server {
 	s := &Server{
 		UserService:  us,
 		AuthService: as,
@@ -63,8 +64,8 @@ func accessControl(h http.Handler) http.Handler {
 	})
 }
 
-type getKeyMessage interface {
-	GetKeyMessage() string
+type iErrBadRequest interface {
+	GetErrorKey() string
 }
 
 
@@ -73,16 +74,16 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	var status int
 
 	switch err.(type) {
-	case *service.ErrBadRequest:
+	case iErrBadRequest:
 		w.WriteHeader(http.StatusBadRequest)
 		status = http.StatusBadRequest
-		key, _ := err.(getKeyMessage)
-		fmt.Println(key.GetKeyMessage())
+		iError, _ := err.(iErrBadRequest)
+		fmt.Println(iError.GetErrorKey())
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		status = http.StatusInternalServerError
+		log.Print(err)
 	}
-
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": err.Error(),

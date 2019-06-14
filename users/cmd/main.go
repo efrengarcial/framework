@@ -59,7 +59,7 @@ func main() {
 	defer db.Close()
 
 	// Setup repositories
-	repo := repository.NewGormRepository(db)
+	repo := repository.NewUserGormRepository(db)
 
 	fieldKeys := []string{"method"}
 	us := service.NewService(repo, log.With(logger, "component", "users"))
@@ -79,8 +79,7 @@ func main() {
 		us,
 	)
 	ts := service.NewTokenService()
-	ur := repository.NewUserGormRepository(db)
-	as := service.NewAuthService(ur, ts, log.With(logger, "component", "auth"))
+	as := service.NewAuthService(repo, ts, log.With(logger, "component", "auth"))
 
 	srv := transport.New(us, as, log.With(logger, "component", "http"))
 
