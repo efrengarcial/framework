@@ -8,6 +8,7 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/efrengarcial/framework/users/pkg/transport"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
@@ -43,6 +44,7 @@ func main() {
 
 	var logger log.Logger
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	logger = level.NewFilter(logger, level.AllowInfo())
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
 	host := envString("DB_HOST", defaultDBHost)

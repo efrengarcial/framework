@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"time"
 )
 
@@ -20,7 +21,7 @@ func NewLoggingService(logger log.Logger, s UserService) UserService {
 
 func (s *loggingService) Create(ctx context.Context, req *model.User) (u *model.User, err error) {
 	defer func(begin time.Time) {
-		s.logger.Log(
+		level.Debug(s.logger).Log(
 			"method", "Create",
 			"login", req.Login,
 			"email", req.Email,

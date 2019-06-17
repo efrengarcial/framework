@@ -40,11 +40,16 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 	)
 
 	if user.ID > 0 {
-		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement.idexists")
+		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement","idexists")
 	}
 
 	if  foundUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); err == nil && foundUser != nil {
-		return nil, NewErrLoginAlreadyUsed("Nombre de inicio de sesión ya usado!", "userManagement.userexists")
+		return nil, NewErrLoginAlreadyUsed()
+	}
+	if err != nil { return nil, err }
+
+	if  foundUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); err == nil && foundUser != nil {
+		return nil, NewErrEmailAlreadyUsed()
 	}
 	if err != nil { return nil, err}
 

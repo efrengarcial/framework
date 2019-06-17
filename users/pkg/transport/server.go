@@ -7,7 +7,8 @@ import (
 	. "github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
-	"log"
+	"github.com/go-kit/kit/log/level"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -16,7 +17,7 @@ type Server struct {
 	UserService UserService
 	AuthService AuthService
 
-	Logger kitlog.Logger
+	logger kitlog.Logger
 
 	router chi.Router
 }
@@ -26,7 +27,7 @@ func New(us UserService,as AuthService, logger kitlog.Logger) *Server {
 	s := &Server{
 		UserService:  us,
 		AuthService: as,
-		Logger:   logger,
+		logger:   logger,
 	}
 
 	r := chi.NewRouter()
@@ -34,10 +35,10 @@ func New(us UserService,as AuthService, logger kitlog.Logger) *Server {
 	r.Use(accessControl)
 
 	r.Route("/api", func(r chi.Router) {
-		h := userHandler{s.UserService, s.Logger}
+		h := userHandler{s.UserService, s.logger}
 		r.Mount("/v1", h.router())
 
-		a := authHandler{s.AuthService, s.Logger}
+		a := authHandler{s.AuthService, s.logger}
 		r.Mount("/authenticate", a.router())
 	})
 
@@ -68,8 +69,11 @@ type iErrBadRequest interface {
 	GetErrorKey() string
 }
 
+type stackTracer interface {
+	StackTrace() errors.StackTrace
+}
 
-func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+func encodeError(_ context.Context, err error,  logger kitlog.Logger, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	var status int
 
@@ -82,8 +86,17 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		status = http.StatusInternalServerError
-		log.Print(err)
 	}
+
+	//fmt.Printf("with stack trace => %+v \n\n", err)
+	level.Error(logger).Log("error", err.(stackTracer))
+
+	/*if err, ok := err.(stackTracer); ok {
+		for _, f := range err.StackTrace() {
+
+			fmt.Printf("%+s:%d\n", f, f)
+		}
+	}*/
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": err.Error(),

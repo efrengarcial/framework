@@ -7,6 +7,7 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"net/http"
 )
 
@@ -31,14 +32,14 @@ func (h *userHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	var user = new(model.User)
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		h.logger.Log("error", err)
-		encodeError(ctx, err, w)
+		level.Error(h.logger).Log("error", err)
+		encodeError(ctx, err, h.logger, w)
 		return
 	}
 
 	user, err := h.service.Create(ctx,user)
 	if err != nil {
-		encodeError(ctx, err, w)
+		encodeError(ctx, err, h.logger, w)
 		return
 	}
 
@@ -51,8 +52,8 @@ func (h *userHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		h.logger.Log("error", err)
-		encodeError(ctx, err, w)
+		level.Error(h.logger).Log("error", err)
+		encodeError(ctx, err, h.logger, w)
 		return
 	}
 }

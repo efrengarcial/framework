@@ -6,6 +6,7 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/repository"
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"net/http"
@@ -29,6 +30,7 @@ func TestCreateHandler(t *testing.T) {
 
 	var logger log.Logger
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	logger = level.NewFilter(logger, level.AllowDebug())
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
 	repo := repository.NewUserGormRepository(db)
@@ -36,7 +38,7 @@ func TestCreateHandler(t *testing.T) {
 	us = service.NewLoggingService(logger, us)
 	handler := userHandler{us, logger}
 
-	var jsonStr = []byte(`{"id" :"1" ,"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
+	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
 	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
