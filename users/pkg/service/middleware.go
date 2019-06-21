@@ -24,3 +24,8 @@ func (a authMiddleware) Create(ctx context.Context, req *model.User) (m0 *model.
 
 	return a.next.Create(ctx, req)
 }
+
+
+func (a authMiddleware) Update(ctx context.Context, user *model.User) (*model.User, error) {
+	panic("implement me")
+}

@@ -44,12 +44,12 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement","idexists")
 	}
 
-	if  existingUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); err == nil && existingUser != nil {
+	if  existingUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); existingUser != nil {
 		return nil, NewErrLoginAlreadyUsed()
 	}
 	if err != nil { return nil, err }
 
-	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); err == nil && existingUser != nil {
+	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email));  existingUser != nil {
 		return nil, NewErrEmailAlreadyUsed()
 	}
 	if err != nil { return nil, err}
@@ -83,9 +83,18 @@ func (service *userService) Update(ctx context.Context, user *model.User) (*mode
 		existingUser *model.User
 	)
 
-	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); err == nil && existingUser != nil {
+	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); existingUser != nil && user.ID !=  existingUser.ID {
 		return nil, NewErrEmailAlreadyUsed()
 	}
-
 	if err != nil { return nil, err }
+
+	if  existingUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); existingUser != nil && user.ID !=  existingUser.ID {
+		return nil, NewErrLoginAlreadyUsed()
+	}
+	if err != nil { return nil, err }
+
+	err  = service.repository.Update(user)
+	if err != nil { return nil, err }
+
+	return user, nil
 }

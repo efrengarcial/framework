@@ -15,7 +15,7 @@ type MultiTenantEntity interface {
 
 //BaseModel
 type Model struct {
-	ID        uint64      	`json:"id,string" gorm:"type:bigserial;primary_key"`
+	ID        uint64      	`json:"id,string" gorm:"autoincrement;primary_key"`
 	CreatedAt time.Time 	`json:"createdAt" gorm:"type:timestamp"`
 	UpdatedAt time.Time 	`json:"updatedAt" gorm:"type:timestamp"`
 	CreatedBy string 		`json:"createdBy"`
@@ -36,12 +36,12 @@ type User struct {
 	FirstName 		string    `json:"firstName"`
 	LastName  		string    `json:"lastName"`
 	Email     		string    `json:"email" validate:"required"`
-	Activated 		bool		`json:"activated" validate:"required"`
-	LangKey   		string    	`json:"langKey"`
+	Activated 		bool	  `json:"activated" validate:"required"`
+	LangKey   		string    `json:"langKey"`
 	ImageUrl  		string    `json:"imageUrl"`
-	ActivationKey  	string    ` json:"-"`
-	ResetKey  		string    ` json:"-"`
-	ResetDate  		time.Time    ` json:"-"`
+	ActivationKey  	string    `json:"-"`
+	ResetKey  		string    `json:"-"`
+	ResetDate  		time.Time  ` json:"-"`
 	Authorities     []Authority `gorm:"many2many:fw_user_authority;association_autoupdate:false;association_autocreate:false"`
 }
 

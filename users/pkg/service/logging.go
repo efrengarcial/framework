@@ -31,3 +31,7 @@ func (s *loggingService) Create(ctx context.Context, req *model.User) (u *model.
 	}(time.Now())
 	return s.next.Create(ctx, req)
 }
+
+func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+	return s.next.Update(ctx, user)
+}

@@ -7,7 +7,6 @@ import (
 	. "github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
 	"net/http"
 	"strings"
@@ -92,12 +91,13 @@ func encodeError(_ context.Context, err error,  logger kitlog.Logger, w http.Res
 				errorLog.WriteString(fmt.Sprintf("%+v \n\n", f))
 			}
 		}
-		level.Error(logger).Log("error", errorLog.String())
+		//level.Error(logger).Log("error", errorLog.String())
+		fmt.Printf("with stack trace => %+v \n\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		status = http.StatusInternalServerError
 	}
 
-	//fmt.Printf("with stack trace => %+v \n\n", err)
+
 
 
 

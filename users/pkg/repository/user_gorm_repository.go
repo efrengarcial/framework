@@ -38,7 +38,7 @@ func (repo *userGormRepository) GetByLogin(login string) (*model.User, error) {
 func (repo *userGormRepository) FindOneByLogin(login string) (*model.User, error) {
 	user := &model.User{}
 	var err error
-	err = repo.DB.Where("login1 = ?", login).First(&user).Error
+	err = repo.DB.Where("login = ?", login).First(&user).Error
 
 	if gorm.IsRecordNotFoundError(err) {
 		return nil, nil

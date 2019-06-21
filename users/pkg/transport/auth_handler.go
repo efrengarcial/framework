@@ -6,7 +6,6 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"net/http"
 )
 
@@ -28,7 +27,6 @@ func (h *authHandler) signIn(w http.ResponseWriter, r *http.Request) {
 	loginVM := new(service.LoginVM)
 
 	if err := json.NewDecoder(r.Body).Decode(&loginVM); err != nil {
-		level.Error(h.logger).Log("error", err)
 		encodeError(ctx, err,h.logger, w)
 		return
 	}
@@ -43,7 +41,6 @@ func (h *authHandler) signIn(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if err := json.NewEncoder(w).Encode(token); err != nil {
-		level.Error(h.logger).Log("error", err)
 		encodeError(ctx, err, h.logger, w)
 		return
 	}

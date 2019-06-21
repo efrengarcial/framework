@@ -3,6 +3,7 @@ package transport
 import (
 	"bytes"
 	"github.com/efrengarcial/framework/users/pkg/db"
+	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/efrengarcial/framework/users/pkg/repository"
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-kit/kit/log"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -38,6 +40,9 @@ func TestCreateHandler(t *testing.T) {
 	us = service.NewLoggingService(logger, us)
 	handler := userHandler{us, logger}
 
+	//user := &model.User{Login:"efren.gl" , Email:"efren.gl@gmail.com" }
+	//repo.Save(user)
+
 	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
 	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
@@ -54,6 +59,50 @@ func TestCreateHandler(t *testing.T) {
 	// Test that the status code is correct.
 	if status := rr.Code; status != http.StatusCreated {
 		t.Errorf("Status code is invalid. Expected %d. Got %d instead", http.StatusCreated, status)
+	}
+
+
+	teardown(db)
+}
+
+func TestUpdateHandler(t *testing.T) {
+	db := setup()
+
+	var logger log.Logger
+	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
+	logger = level.NewFilter(logger, level.AllowDebug())
+	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+
+	repo := repository.NewUserGormRepository(db)
+	us := service.NewService(repo, log.With(logger, "component", "users"))
+	us = service.NewLoggingService(logger, us)
+	handler := userHandler{us, logger}
+
+	user := &model.User{Login:"efren.gl" , Email:"efren.garcia@gmail.com" }
+	saveUser, err := repo.Insert(user)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var  users []model.User
+	repo.FindAll(&users, "")
+
+	var jsonStr = []byte(`{"id" : "` +  strconv.FormatUint(saveUser.GetID(), 10) + `","login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
+	req, err := http.NewRequest("PUT", "/users", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Our API expects a json body, so set the content-type header to make sure it's treated as one.
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+
+	rr := httptest.NewRecorder()
+
+	http.HandlerFunc(handler.updateUser).ServeHTTP(rr, req)
+
+	// Test that the status code is correct.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Status code is invalid. Expected %d. Got %d instead", http.StatusOK, status)
 	}
 
 

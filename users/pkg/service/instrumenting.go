@@ -14,6 +14,7 @@ type instrumentingService struct {
 	next           UserService
 }
 
+
 // NewInstrumentingService returns an instance of an instrumenting Service.
 func NewInstrumentingService(counter metrics.Counter, latency metrics.Histogram, s UserService) UserService {
 	return &instrumentingService{
@@ -30,4 +31,9 @@ func (s *instrumentingService) Create(ctx context.Context, req *model.User) (*mo
 	}(time.Now())
 
 	return s.next.Create(ctx, req)
+}
+
+
+func (s *instrumentingService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+	panic("implement me")
 }
