@@ -56,6 +56,9 @@ func (gr GormRepository) FindAll(result interface{}, where string, args ...inter
 }
 
 func (gr GormRepository) FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{} ) *pagination.Paginator {
+	//http://jinzhu.me/gorm/crud.html#query
+	//err := gr.DB.Table("users").Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&result)
+
 	gr.DB = gr.DB.Model(pageable.Model).Where(where, args)
 	p := &pagination.Param{
 		DB:      gr.DB,

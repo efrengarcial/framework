@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -34,4 +35,9 @@ func (s *loggingService) Create(ctx context.Context, req *model.User) (u *model.
 
 func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.User, error) {
 	return s.next.Update(ctx, user)
+}
+
+
+func (s *loggingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
+	return s.next.FindAll(pageable, result, where, args)
 }

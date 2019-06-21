@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
 )
 
@@ -11,6 +12,7 @@ type Middleware func(UserService) UserService
 type authMiddleware struct {
 	next UserService
 }
+
 
 // AuthMiddleware returns a UserService Middleware.
 func AuthMiddleware() Middleware {
@@ -27,5 +29,10 @@ func (a authMiddleware) Create(ctx context.Context, req *model.User) (m0 *model.
 
 
 func (a authMiddleware) Update(ctx context.Context, user *model.User) (*model.User, error) {
+	panic("implement me")
+}
+
+
+func (a authMiddleware) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
 	panic("implement me")
 }

@@ -29,7 +29,7 @@ func init() {
 //https://github.com/bxcodec/go-clean-arch/blob/master/article/usecase/article_ucase_test.go
 // mockery -name=Repository
 func TestInsert(t *testing.T) {
-	mockRepository :=  new(mocks.Repository)
+	mockUserRepository :=  new(mocks.UserRepository)
 
 	mockAuthority := model.Authority{Model: model.Model{ID: 1}}
 
@@ -42,14 +42,14 @@ func TestInsert(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		mockRepository.On("Insert", mock.AnythingOfType("*model.User")).Return(mockUser, nil).Once()
-		u := NewService(mockRepository,  logger)
+		mockUserRepository.On("Insert", mock.AnythingOfType("*model.User")).Return(mockUser, nil).Once()
+		u := NewService(mockUserRepository,  logger)
 
 		user, err := u.Create(context.TODO(), mockUser)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, user)
 
-		mockRepository.AssertExpectations(t)
+		mockUserRepository.AssertExpectations(t)
 	})
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"time"
 
@@ -35,5 +36,9 @@ func (s *instrumentingService) Create(ctx context.Context, req *model.User) (*mo
 
 
 func (s *instrumentingService) Update(ctx context.Context, user *model.User) (*model.User, error) {
-	panic("implement me")
+	return s.next.Update(ctx, user)
+}
+
+func (s *instrumentingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
+	return s.next.FindAll(pageable, result, where, args)
 }

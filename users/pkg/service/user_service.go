@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/go-kit/kit/log"
 	"golang.org/x/crypto/bcrypt"
@@ -14,6 +15,7 @@ import (
 type UserService interface {
 	Create(ctx context.Context, user *model.User) (*model.User, error)
 	Update(ctx context.Context, user *model.User) (*model.User, error)
+	FindAll(pageable model.Pageable, result interface{},  where string, args ...interface{}) *pagination.Paginator
 }
 
 
@@ -22,7 +24,6 @@ type userService struct {
 	repository UserRepository
 	logger     log.Logger
 }
-
 
 // NewService creates and returns a new User service instance
 func NewService(rep UserRepository, logger log.Logger) UserService {
@@ -97,4 +98,9 @@ func (service *userService) Update(ctx context.Context, user *model.User) (*mode
 	if err != nil { return nil, err }
 
 	return user, nil
+}
+
+
+func (service *userService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
+	return service.repository.FindAllPageable(pageable, result, where, args)
 }
