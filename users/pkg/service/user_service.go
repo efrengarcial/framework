@@ -12,7 +12,8 @@ import (
 
 // UserService describes the service.
 type UserService interface {
-	Create(ctx context.Context, req *model.User) (*model.User, error)
+	Create(ctx context.Context, user *model.User) (*model.User, error)
+	Update(ctx context.Context, user *model.User) (*model.User, error)
 }
 
 
@@ -36,19 +37,19 @@ func NewService(rep UserRepository, logger log.Logger) UserService {
 func (service *userService) Create(ctx context.Context, user *model.User) (*model.User, error) {
 	var  (
 		err error
-		foundUser *model.User
+		existingUser *model.User
 	)
 
 	if user.ID > 0 {
 		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement","idexists")
 	}
 
-	if  foundUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); err == nil && foundUser != nil {
+	if  existingUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); err == nil && existingUser != nil {
 		return nil, NewErrLoginAlreadyUsed()
 	}
 	if err != nil { return nil, err }
 
-	if  foundUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); err == nil && foundUser != nil {
+	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); err == nil && existingUser != nil {
 		return nil, NewErrEmailAlreadyUsed()
 	}
 	if err != nil { return nil, err}
@@ -76,3 +77,15 @@ func (service *userService) Create(ctx context.Context, user *model.User) (*mode
 }
 
 
+func (service *userService) Update(ctx context.Context, user *model.User) (*model.User, error) {
+	var  (
+		err error
+		existingUser *model.User
+	)
+
+	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); err == nil && existingUser != nil {
+		return nil, NewErrEmailAlreadyUsed()
+	}
+
+	if err != nil { return nil, err }
+}

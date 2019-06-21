@@ -42,6 +42,7 @@ func main() {
 
 	flag.Parse()
 
+	//https://medium.com/google-cloud/hidden-super-powers-of-stackdriver-logging-ca110dae7e74
 	var logger log.Logger
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = level.NewFilter(logger, level.AllowInfo())

@@ -10,6 +10,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
 	"net/http"
+	"strings"
 )
 
 // Server holds the dependencies for a HTTP server.
@@ -84,19 +85,22 @@ func encodeError(_ context.Context, err error,  logger kitlog.Logger, w http.Res
 		iError, _ := err.(iErrBadRequest)
 		fmt.Println(iError.GetErrorKey())
 	default:
+		var errorLog strings.Builder
+		errorLog.WriteString(err.Error() + "\n\n")
+		if err, ok := err.(stackTracer); ok {
+			for _, f := range err.StackTrace() {
+				errorLog.WriteString(fmt.Sprintf("%+v \n\n", f))
+			}
+		}
+		level.Error(logger).Log("error", errorLog.String())
 		w.WriteHeader(http.StatusInternalServerError)
 		status = http.StatusInternalServerError
 	}
 
 	//fmt.Printf("with stack trace => %+v \n\n", err)
-	level.Error(logger).Log("error", err.(stackTracer))
 
-	/*if err, ok := err.(stackTracer); ok {
-		for _, f := range err.StackTrace() {
 
-			fmt.Printf("%+s:%d\n", f, f)
-		}
-	}*/
+
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message": err.Error(),

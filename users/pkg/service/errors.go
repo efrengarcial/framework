@@ -2,7 +2,7 @@ package service
 
 //https://medium.com/rungo/error-handling-in-go-f0125de052f0
 //https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
-
+//https://medium.com/@sebdah/go-best-practices-error-handling-2d15e1f0c5ee
 
 type IErrBadRequest interface {
 	error
