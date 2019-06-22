@@ -7,7 +7,6 @@ import (
 	"github.com/efrengarcial/framework/users/pkg/service"
 	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/prometheus/common/log"
 	"net/http"
 )
 
@@ -92,9 +91,8 @@ func (h *userHandler) findAll(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	var users []model.User
-	pageable := model.Pageable{Model: &model.User{}, Page:1 , Limit: 10 , OrderBy: []string{"id desc"}}
-	p := h.service.FindAll(pageable, &users, "id > 0 ")
-	log.Info(p)
+	pageable := model.Pageable{Model: &model.User{}, Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
+	_ = h.service.FindAll(pageable, &users, "id > 0 ")
 
 	var response = struct { Users []model.User `json:"users"` }{
 		Users: users,

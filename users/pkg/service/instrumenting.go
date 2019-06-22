@@ -40,5 +40,5 @@ func (s *instrumentingService) Update(ctx context.Context, user *model.User) (*m
 }
 
 func (s *instrumentingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
-	return s.next.FindAll(pageable, result, where, args)
+	return s.next.FindAll(pageable, result, where, args )
 }
