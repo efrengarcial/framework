@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
+	"github.com/efrengarcial/framework/users/pkg/utils/paginations"
 )
 
 // Middleware describes a service middleware.
@@ -33,6 +33,6 @@ func (a authMiddleware) Update(ctx context.Context, user *model.User) (*model.Us
 }
 
 
-func (a authMiddleware) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
+func (a authMiddleware) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error) {
 	panic("implement me")
 }

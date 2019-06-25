@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
+	"github.com/efrengarcial/framework/users/pkg/utils/paginations"
 	"github.com/go-kit/kit/log"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -15,7 +15,7 @@ import (
 type UserService interface {
 	Create(ctx context.Context, user *model.User) (*model.User, error)
 	Update(ctx context.Context, user *model.User) (*model.User, error)
-	FindAll(pageable model.Pageable, result interface{},  where string, args ...interface{}) *pagination.Paginator
+	FindAll(pageable model.Pageable, result interface{},  where string, args ...interface{})(*paginations.Pagination, error)
 }
 
 
@@ -101,6 +101,6 @@ func (service *userService) Update(ctx context.Context, user *model.User) (*mode
 }
 
 
-func (service *userService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
-	return service.repository.FindAllPageable(pageable, result, where, args)
+func (service *userService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error){
+	return service.repository.FindAllPageable(pageable, result, where, args...)
 }

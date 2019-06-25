@@ -92,7 +92,11 @@ func (h *userHandler) findAll(w http.ResponseWriter, r *http.Request) {
 
 	var users []model.User
 	pageable := model.Pageable{Model: &model.User{}, Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
-	_ = h.service.FindAll(pageable, &users, "id > 0 ")
+	_, err := h.service.FindAll(pageable, &users, "id > 0 ")
+	if err != nil {
+		encodeError(ctx, err, h.logger, w)
+		return
+	}
 
 	var response = struct { Users []model.User `json:"users"` }{
 		Users: users,

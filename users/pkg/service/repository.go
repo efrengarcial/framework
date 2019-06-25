@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
+	"github.com/efrengarcial/framework/users/pkg/utils/paginations"
 )
 
 // mockery -name=Repository
@@ -21,7 +21,7 @@ type Repository interface {
 
 	FindAll(result interface{}, where string, args ...interface{}) (err error)
 
-	FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{}) *pagination.Paginator
+	FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{}) (*paginations.Pagination, error)
 
 	Delete(model model.IModel, where string, args ...interface{}) error
 

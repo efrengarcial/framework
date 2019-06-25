@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/efrengarcial/framework/users/pkg/service"
+	"github.com/efrengarcial/framework/users/pkg/utils/paginations"
 	"github.com/jinzhu/gorm"
 )
 
@@ -19,7 +19,7 @@ func (gr GormRepository) Insert(model model.IModel) (model.IModel, error){
 	if err := model.Validate(); err != nil{
 		return nil, err
 	}
-	if err := gr.DB.Debug().Create(model).Error; err != nil{
+	if err := gr.DB.Create(model).Error; err != nil{
 		return nil, err
 	}
 	return model, nil
@@ -55,19 +55,18 @@ func (gr GormRepository) FindAll(result interface{}, where string, args ...inter
 	return
 }
 
-func (gr GormRepository) FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{} ) *pagination.Paginator {
+func (gr GormRepository) FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{} ) (*paginations.Pagination, error) {
 	//http://jinzhu.me/gorm/crud.html#query
 	//err := gr.DB.Table("users").Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&result)
-
 	//gr.DB = gr.DB.Model(pageable.Model).Where(where, args)
-	p := &pagination.Param{
-		DB:      gr.DB.Where(where),
+	p := &paginations.Param{
+		DB:      gr.DB.Where(where, args),
 		Page:    pageable.Page,
 		Limit:   pageable.Limit,
 		OrderBy: pageable.OrderBy,
 		ShowSQL: pageable.ShowSQL,
 	}
-	return pagination.Paging(p, result)
+	return paginations.Pagging(p, result)
 }
 
 func (gr GormRepository) Delete(model model.IModel, where string, args ...interface{}) error {

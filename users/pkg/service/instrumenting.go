@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/biezhi/gorm-paginator/pagination"
 	"github.com/efrengarcial/framework/users/pkg/model"
+	"github.com/efrengarcial/framework/users/pkg/utils/paginations"
 	"time"
 
 	"github.com/go-kit/kit/metrics"
@@ -39,6 +39,6 @@ func (s *instrumentingService) Update(ctx context.Context, user *model.User) (*m
 	return s.next.Update(ctx, user)
 }
 
-func (s *instrumentingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) *pagination.Paginator {
-	return s.next.FindAll(pageable, result, where, args )
+func (s *instrumentingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error) {
+	return s.next.FindAll(pageable, result, where, args...)
 }

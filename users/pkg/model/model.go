@@ -16,8 +16,8 @@ type MultiTenantEntity interface {
 //BaseModel
 type Model struct {
 	ID        uint64      	`json:"id,string" gorm:"type:bigint(20) unsigned auto_increment;not null;primary_key`
-	CreatedAt time.Time 	`json:"createdAt" gorm:"type:timestamp"`
-	UpdatedAt time.Time 	`json:"updatedAt" gorm:"type:timestamp"`
+	CreatedAt *time.Time 	`json:"createdAt,omitempty" gorm:"type:timestamp"`
+	UpdatedAt *time.Time 	`json:"updatedAt,omitempty" gorm:"type:timestamp"`
 	CreatedBy string 		`json:"createdBy"`
 	LastModifiedBy string   `json:"lastModifiedBy"`
 	//DeletedAt *time.Time	`json:"deletedAt"`
@@ -32,7 +32,7 @@ type User struct {
 	Model
 	TenantId		uint64	  `json:"tenantId"`
 	Login	  		string    `json:"login" validate:"required"`
-	Password  		string    `json:"password" validate:"required"`
+	Password  		string    `json:"-" validate:"required"`
 	FirstName 		string    `json:"firstName"`
 	LastName  		string    `json:"lastName"`
 	Email     		string    `json:"email" validate:"required"`
