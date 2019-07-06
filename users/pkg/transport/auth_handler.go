@@ -1,10 +1,10 @@
 package transport
 
 import (
-	"encoding/json"
+	"context"
 	"github.com/efrengarcial/framework/users/pkg/model"
 	"github.com/efrengarcial/framework/users/pkg/service"
-	"github.com/go-chi/chi"
+	"github.com/gin-gonic/gin"
 	kitlog "github.com/go-kit/kit/log"
 	"net/http"
 )
@@ -15,35 +15,23 @@ type authHandler struct {
 	logger  kitlog.Logger
 }
 
-func (h *authHandler) router() http.Handler  {
-	r := chi.NewRouter()
-	r.Post("/", h.signIn)
-	return r
-}
 
-func (h *authHandler) signIn(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (h *authHandler) signIn(c *gin.Context) {
+	ctx := context.Background()
 
 	loginVM := new(service.LoginVM)
-
-	if err := json.NewDecoder(r.Body).Decode(&loginVM); err != nil {
-		encodeError(ctx, err,h.logger, w)
-		return
-	}
+	c.BindJSON(&loginVM)
 
 	token:= new(model.Token)
 	err := h.service.Auth(ctx, loginVM, token)
 
 	if err != nil {
-		encodeError(ctx, err, h.logger, w)
+		encodeError1(err, h.logger, c)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	if err := json.NewEncoder(w).Encode(token); err != nil {
-		encodeError(ctx, err, h.logger, w)
-		return
-	}
+	c.JSON(http.StatusCreated, token)
 
 }
+
 

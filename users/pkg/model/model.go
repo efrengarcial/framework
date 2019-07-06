@@ -16,8 +16,8 @@ type MultiTenantEntity interface {
 //BaseModel
 type Model struct {
 	ID        uint64      	`json:"id,string" gorm:"type:bigint(20) unsigned auto_increment;not null;primary_key`
-	CreatedAt *time.Time 	`json:"createdAt,omitempty" gorm:"type:timestamp"`
-	UpdatedAt *time.Time 	`json:"updatedAt,omitempty" gorm:"type:timestamp"`
+	CreatedAt *time.Time 	`json:"createdAt,omitempty" gorm:"type:timestamp; not null"`
+	UpdatedAt *time.Time 	`json:"updatedAt,omitempty" gorm:"type:timestamp; not null"`
 	CreatedBy string 		`json:"createdBy"`
 	LastModifiedBy string   `json:"lastModifiedBy"`
 	//DeletedAt *time.Time	`json:"deletedAt"`
@@ -31,12 +31,12 @@ func (base *Model) GetID() uint64 {
 type User struct {
 	Model
 	TenantId		uint64	  `json:"tenantId"`
-	Login	  		string    `json:"login" validate:"required"`
-	Password  		string    `json:"-" validate:"required"`
+	Login	  		string    `json:"login" validate:"required" gorm:"not null"`
+	Password  		string    `json:"-" validate:"required" gorm:"not null"`
 	FirstName 		string    `json:"firstName"`
 	LastName  		string    `json:"lastName"`
-	Email     		string    `json:"email" validate:"required"`
-	Activated 		bool	  `json:"activated" validate:"required"`
+	Email     		string    `json:"email" validate:"required" gorm:"not null"`
+	Activated 		bool	  `json:"activated" validate:"required" gorm:"not null"`
 	LangKey   		string    `json:"langKey"`
 	ImageUrl  		string    `json:"imageUrl"`
 	ActivationKey  	string    `json:"-"`
@@ -47,14 +47,14 @@ type User struct {
 
 type Authority struct {
 	Model
-	Name 		string 			`json:"name" validate:"required" `
+	Name 		string 			`json:"name" validate:"required" gorm:"not null"`
 	TenantId	uint64	  		`json:"tenantId"`
 	Privileges  []Privilege `gorm:"many2many:fw_authority_privilege;association_autoupdate:false;association_autocreate:false"`
 }
 
 
 type Privilege struct {
-	Name string 			`json:"name" gorm:"primary_key"`
+	Name 		string 	`json:"name" gorm:"primary_key"`
 }
 
 // Token Entity

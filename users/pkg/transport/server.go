@@ -1,11 +1,9 @@
 package transport
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	. "github.com/efrengarcial/framework/users/pkg/service"
-	"github.com/go-chi/chi"
+	"github.com/gin-gonic/gin"
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
@@ -20,7 +18,7 @@ type Server struct {
 
 	logger kitlog.Logger
 
-	router chi.Router
+	router *gin.Engine
 }
 
 // New returns a new HTTP server.
@@ -31,19 +29,22 @@ func New(us UserService,as AuthService, logger kitlog.Logger) *Server {
 		logger:   logger,
 	}
 
-	r := chi.NewRouter()
+	//gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+	router.Use(corsMiddleware())
 
-	r.Use(accessControl)
-
-	r.Route("/api", func(r chi.Router) {
+	v1 := router.Group("/api/v1")
+	{
 		h := userHandler{s.UserService, s.logger}
-		r.Mount("/v1", h.router())
+		v1.POST("/users" , h.createUser)
+		v1.PUT("/users", h.updateUser)
+		v1.GET("/users", h.findAll)
+	}
 
-		a := authHandler{s.AuthService, s.logger}
-		r.Mount("/authenticate", a.router())
-	})
+	a := authHandler{s.AuthService, s.logger}
+	router.POST("/authenticate", a.signIn)
 
-	s.router = r
+	s.router = router
 
 	return s
 }
@@ -52,18 +53,20 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-func accessControl(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
 
-		if r.Method == "OPTIONS" {
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
 			return
 		}
 
-		h.ServeHTTP(w, r)
-	})
+		c.Next()
+	}
 }
 
 type iErrBadRequest interface {
@@ -74,13 +77,11 @@ type stackTracer interface {
 	StackTrace() errors.StackTrace
 }
 
-func encodeError(_ context.Context, err error,  logger kitlog.Logger, w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+func encodeError1(err error,  logger kitlog.Logger,c *gin.Context) {
 	var status int
 
 	switch err.(type) {
 	case iErrBadRequest:
-		w.WriteHeader(http.StatusBadRequest)
 		status = http.StatusBadRequest
 		iError, _ := err.(iErrBadRequest)
 		fmt.Println(iError.GetErrorKey())
@@ -94,13 +95,11 @@ func encodeError(_ context.Context, err error,  logger kitlog.Logger, w http.Res
 		}
 		level.Error(logger).Log("error", errorLog.String())
 		fmt.Printf("with stack trace => %+v \n\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
 		status = http.StatusInternalServerError
 	}
 
-
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	c.AbortWithStatusJSON(status, gin.H{
 		"message": err.Error(),
 		"status" : status,
-	})
+	} )
 }
