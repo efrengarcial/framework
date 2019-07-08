@@ -33,6 +33,6 @@ func (a authMiddleware) Update(ctx context.Context, user *model.User) (*model.Us
 }
 
 
-func (a authMiddleware) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error) {
+func (a authMiddleware) FindAll(pageable *model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error) {
 	panic("implement me")
 }

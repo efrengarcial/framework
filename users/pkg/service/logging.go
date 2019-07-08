@@ -38,6 +38,6 @@ func (s *loggingService) Update(ctx context.Context, user *model.User) (*model.U
 }
 
 
-func (s *loggingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{})(*paginations.Pagination, error) {
+func (s *loggingService) FindAll(pageable *model.Pageable, result interface{}, where string, args ...interface{})(*paginations.Pagination, error) {
 	return s.next.FindAll(pageable, result, where, args...)
 }

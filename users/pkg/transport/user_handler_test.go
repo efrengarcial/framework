@@ -10,6 +10,7 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -38,13 +39,14 @@ func TestCreateHandler(t *testing.T) {
 	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, log.With(logger, "component", "users"))
 	us = service.NewLoggingService(logger, us)
-	handler := userHandler{us, logger}
+	router := SetupUserRouter(us, logger)
+
 
 	//user := &model.User{Login:"efren.gl" , Email:"efren.gl@gmail.com" }
 	//repo.Save(user)
 
 	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
-	req, err := http.NewRequest("POST", "/users", bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,15 +54,10 @@ func TestCreateHandler(t *testing.T) {
 	// Our API expects a json body, so set the content-type header to make sure it's treated as one.
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 
-	http.HandlerFunc(handler.createUser).ServeHTTP(rr, req)
-
-	// Test that the status code is correct.
-	if status := rr.Code; status != http.StatusCreated {
-		t.Errorf("Status code is invalid. Expected %d. Got %d instead", http.StatusCreated, status)
-	}
-
+	assert.Equal(t, http.StatusCreated, w.Code)
 
 	teardown(db)
 }
@@ -76,7 +73,7 @@ func TestUpdateHandler(t *testing.T) {
 	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, log.With(logger, "component", "users"))
 	us = service.NewLoggingService(logger, us)
-	handler := userHandler{us, logger}
+	router := SetupUserRouter(us, logger)
 
 	user := &model.User{Login:"efren.gl" , Email:"efren.garcia@gmail.com" }
 	saveUser, err := repo.Insert(user)
@@ -88,7 +85,7 @@ func TestUpdateHandler(t *testing.T) {
 	repo.FindAll(&users, "")
 
 	var jsonStr = []byte(`{"id" : "` +  strconv.FormatUint(saveUser.GetID(), 10) + `","login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
-	req, err := http.NewRequest("PUT", "/users", bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("PUT", "/api/v1/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,14 +93,10 @@ func TestUpdateHandler(t *testing.T) {
 	// Our API expects a json body, so set the content-type header to make sure it's treated as one.
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 
-	http.HandlerFunc(handler.updateUser).ServeHTTP(rr, req)
-
-	// Test that the status code is correct.
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code is invalid. Expected %d. Got %d instead", http.StatusOK, status)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 
 
 	teardown(db)

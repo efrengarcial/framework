@@ -39,6 +39,6 @@ func (s *instrumentingService) Update(ctx context.Context, user *model.User) (*m
 	return s.next.Update(ctx, user)
 }
 
-func (s *instrumentingService) FindAll(pageable model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error) {
+func (s *instrumentingService) FindAll(pageable *model.Pageable, result interface{}, where string, args ...interface{}) (*paginations.Pagination, error) {
 	return s.next.FindAll(pageable, result, where, args...)
 }

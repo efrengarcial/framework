@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	kitlog "github.com/go-kit/kit/log"
 	"net/http"
+	"strconv"
 )
 
 type userHandler struct {
@@ -59,9 +60,16 @@ func (h *userHandler) updateUser(c *gin.Context) {
 
 
 func (h *userHandler) findAll(c *gin.Context) {
+	pageable :=  new(model.Pageable)
+	page, err := strconv.Atoi(c.Query("page"))
+	limit, err := strconv.Atoi(c.Query("limit"))
+	pageable.Page = page
+	pageable.Limit = limit
+	pageable.OrderBy= c.QueryArray("orderBy")
+
 	var users []model.User
-	pageable := model.Pageable{Model: &model.User{}, Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
-	_, err := h.service.FindAll(pageable, &users, "")
+	//pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
+	_, err = h.service.FindAll(pageable, &users, "")
 	if err != nil {
 		encodeError1( err, h.logger, c)
 		return

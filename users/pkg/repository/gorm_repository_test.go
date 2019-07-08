@@ -217,8 +217,8 @@ func  Test_repository_FindAllPageable(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).
 			AddRow(1))
 
-	pageable := model.Pageable{Model: &model.User{}, Page:1 , Limit: 10 , OrderBy: []string{"id desc"}}
-	_ = repository.FindAllPageable( pageable, &users, "id > 0 ")
+	pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"}}
+	_, err  = repository.FindAllPageable( &pageable, &users, "id > 0 ")
 
 	assert.NoError(t, err)
 	assert.Len(t, users, 1)

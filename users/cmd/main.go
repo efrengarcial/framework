@@ -23,7 +23,7 @@ const (
 	defaultDBHost     = "127.0.0.1"
 	defaultDBNme      = "db"
 	defaultDBUser     = "postgres"
-	defaultDBPassword = "dbpwd"
+	defaultDBPassword = "password"
 )
 
 func main() {

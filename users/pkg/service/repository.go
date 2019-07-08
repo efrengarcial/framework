@@ -21,7 +21,7 @@ type Repository interface {
 
 	FindAll(result interface{}, where string, args ...interface{}) (err error)
 
-	FindAllPageable(pageable model.Pageable, result interface{},  where string, args ...interface{}) (*paginations.Pagination, error)
+	FindAllPageable(pageable *model.Pageable, result interface{},  where string, args ...interface{}) (*paginations.Pagination, error)
 
 	Delete(model model.IModel, where string, args ...interface{}) error
 

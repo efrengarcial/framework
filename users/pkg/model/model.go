@@ -96,9 +96,8 @@ func (Privilege) TableName() string {
 }
 
 type Pageable struct {
-	Page    int
-	Limit   int
-	OrderBy []string
+	Page    int  `json:"page"`
+	Limit   int   `json:"limit"`
+	OrderBy []string `json:"orderBy"`
 	ShowSQL bool
-	Model 	IModel
 }
