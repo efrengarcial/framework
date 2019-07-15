@@ -2,9 +2,9 @@ package transport
 
 import (
 	"bytes"
-	repository2 "github.com/efrengarcial/framework/pkg/users/repository"
-	service2 "github.com/efrengarcial/framework/pkg/users/service"
-	"github.com/efrengarcial/framework/pkg/userssers/pkg/util/dbutil"
+	repository2 "github.com/efrengarcial/framework/internal/users/repository"
+	service2 "github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/userssers/pkg/util/dbutil"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/jinzhu/gorm"

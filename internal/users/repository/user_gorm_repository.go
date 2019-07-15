@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/efrengarcial/framework/pkg/users/service"
+	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )

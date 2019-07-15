@@ -1,8 +1,8 @@
 package repository
 
 import (
-	service2 "github.com/efrengarcial/framework/pkg/users/service"
-	"github.com/efrengarcial/framework/pkg/users/util/dbutil"
+	"github.com/efrengarcial/framework/internal/platform/database"
+	service2 "github.com/efrengarcial/framework/internal/users/service"
 	"github.com/jinzhu/gorm"
 )
 
@@ -54,18 +54,18 @@ func (gr GormRepository) FindAll(result interface{}, where string, args ...inter
 	return
 }
 
-func (gr GormRepository) FindAllPageable(pageable *service2.Pageable, result interface{},  where string, args ...interface{} ) (*dbutil.Pagination, error) {
+func (gr GormRepository) FindAllPageable(pageable *service2.Pageable, result interface{},  where string, args ...interface{} ) (*database.Pagination, error) {
 	//http://jinzhu.me/gorm/crud.html#query
 	//err := gr.DB.Table("users").Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&result)
 	//gr.DB = gr.DB.Model(pageable.Model).Where(where, args)
-	p := &dbutil.Param{
+	p := &database.Param{
 		DB:      gr.DB.Where(where, args),
 		Page:    pageable.Page,
 		Limit:   pageable.Limit,
 		OrderBy: pageable.OrderBy,
 		ShowSQL: pageable.ShowSQL,
 	}
-	return dbutil.Pagging(p, result)
+	return database.Pagging(p, result)
 }
 
 func (gr GormRepository) Delete(model service2.IModel, where string, args ...interface{}) error {

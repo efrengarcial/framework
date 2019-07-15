@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/efrengarcial/framework/pkg/users/repository"
-	"github.com/efrengarcial/framework/pkg/users/service"
-	"github.com/efrengarcial/framework/pkg/users/transport"
+	"github.com/efrengarcial/framework/internal/users/repository"
+	"github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/users/transport"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"

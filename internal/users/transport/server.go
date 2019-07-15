@@ -2,7 +2,7 @@ package transport
 
 import (
 	"fmt"
-	"github.com/efrengarcial/framework/pkg/users/service"
+	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	kitlog "github.com/go-kit/kit/log"

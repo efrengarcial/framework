@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql/driver"
 	"github.com/DATA-DOG/go-sqlmock"
-	service2 "github.com/efrengarcial/framework/pkg/users/service"
+	service2 "github.com/efrengarcial/framework/internal/users/service"
 	"github.com/go-test/deep"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"

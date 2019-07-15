@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/efrengarcial/framework/pkg/users/util/dbutil"
+	"github.com/efrengarcial/framework/internal/platform/database"
 )
 
 // mockery -name=Repository
@@ -20,7 +20,7 @@ type Repository interface {
 
 	FindAll(result interface{}, where string, args ...interface{}) (err error)
 
-	FindAllPageable(pageable *Pageable, result interface{},  where string, args ...interface{}) (*dbutil.Pagination, error)
+	FindAllPageable(pageable *Pageable, result interface{},  where string, args ...interface{}) (*database.Pagination, error)
 
 	Delete(model IModel, where string, args ...interface{}) error
 

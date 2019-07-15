@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/efrengarcial/framework/pkg/users/util/dbutil"
+	"github.com/efrengarcial/framework/internal/platform/database"
 )
 
 // Middleware describes a service middleware.
@@ -32,6 +32,6 @@ func (a authMiddleware) Update(ctx context.Context, user *User) (*User, error) {
 }
 
 
-func (a authMiddleware) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{}) (*dbutil.Pagination, error) {
+func (a authMiddleware) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
 	panic("implement me")
 }

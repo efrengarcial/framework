@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/efrengarcial/framework/pkg/users/util/dbutil"
+	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"time"
@@ -37,6 +37,6 @@ func (s *loggingService) Update(ctx context.Context, user *User) (*User, error) 
 }
 
 
-func (s *loggingService) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{})(*dbutil.Pagination, error) {
+func (s *loggingService) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{})(*database.Pagination, error) {
 	return s.FindAll(pageable, result, where, args...)
 }

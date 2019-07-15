@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/efrengarcial/framework/pkg/users/util"
-	"github.com/efrengarcial/framework/pkg/users/util/dbutil"
+	platform2 "github.com/efrengarcial/framework/internal/platform"
+	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/go-kit/kit/log"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -15,7 +15,7 @@ import (
 type UserService interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
-	FindAll(pageable *Pageable, result interface{},  where string, args ...interface{})(*dbutil.Pagination, error)
+	FindAll(pageable *Pageable, result interface{},  where string, args ...interface{})(*database.Pagination, error)
 }
 
 
@@ -60,12 +60,12 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 	}
 
 	// Generates a hashed version of our password
-	randomPassword, _ := util.GeneratePassword()
+	randomPassword, _ := platform2.GeneratePassword()
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)
 	if err != nil { return nil, err}
 
 	user.Password = string(hashedPass)
-	resetKey, _ := util.GenerateResetKey()
+	resetKey, _ := platform2.GenerateResetKey()
 	user.ResetKey = resetKey
 	user.ResetDate = time.Now()
 	user.Activated = true
@@ -101,6 +101,6 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 }
 
 
-func (service *userService) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{}) (*dbutil.Pagination, error){
+func (service *userService) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error){
 	return service.repository.FindAllPageable(pageable, result, where, args...)
 }

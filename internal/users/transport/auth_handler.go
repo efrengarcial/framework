@@ -2,7 +2,7 @@ package transport
 
 import (
 	"context"
-	service2 "github.com/efrengarcial/framework/pkg/users/service"
+	service2 "github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
 	kitlog "github.com/go-kit/kit/log"
 	"net/http"

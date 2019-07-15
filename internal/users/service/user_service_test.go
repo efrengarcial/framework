@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/efrengarcial/framework/pkg/users/mocks"
+	"github.com/efrengarcial/framework/internal/users/mocks"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/stretchr/testify/assert"

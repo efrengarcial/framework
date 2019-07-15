@@ -1,4 +1,4 @@
-package util
+package platform
 
 import "github.com/Masterminds/goutils"
 
