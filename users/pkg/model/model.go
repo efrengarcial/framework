@@ -27,7 +27,7 @@ func (base *Model) GetID() uint64 {
 	return base.ID
 }
 
-// User Entity
+// User represents a user in the system.
 type User struct {
 	Model
 	TenantId		uint64	  `json:"tenantId"`
