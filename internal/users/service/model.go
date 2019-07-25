@@ -1,35 +1,14 @@
 package service
 
 import (
+	base "github.com/efrengarcial/framework/internal/platform/service"
 	"time"
 )
 
-type IModel interface {
-	GetID() uint64
-	Validate() error
-}
-
-type MultiTenantEntity interface {
-	GetTenantID() uint64
-}
-
-//BaseModel
-type Model struct {
-	ID        uint64      	`json:"id,string" gorm:"type:bigint(20) unsigned auto_increment;not null;primary_key`
-	CreatedAt *time.Time 	`json:"createdAt,omitempty" gorm:"type:timestamp; not null"`
-	UpdatedAt *time.Time 	`json:"updatedAt,omitempty" gorm:"type:timestamp; not null"`
-	CreatedBy string 		`json:"createdBy"`
-	LastModifiedBy string   `json:"lastModifiedBy"`
-	//DeletedAt *time.Time	`json:"deletedAt"`
-}
-
-func (base *Model) GetID() uint64 {
-	return base.ID
-}
 
 // User represents a user in the system.
 type User struct {
-	Model
+	base.Model
 	TenantId		uint64	  `json:"tenantId"`
 	Login	  		string    `json:"login" validate:"required" gorm:"not null"`
 	Password  		string    `json:"-" validate:"required" gorm:"not null"`
@@ -46,7 +25,7 @@ type User struct {
 }
 
 type Authority struct {
-	Model
+	base.Model
 	Name 		string 			`json:"name" validate:"required" gorm:"not null"`
 	TenantId	uint64	  		`json:"tenantId"`
 	Privileges  []Privilege `gorm:"many2many:fw_authority_privilege;association_autoupdate:false;association_autocreate:false"`
@@ -93,11 +72,4 @@ func (Authority) TableName() string {
 // Set User's table name to be `fw_authority`
 func (Privilege) TableName() string {
 	return "fw_privilege"
-}
-
-type Pageable struct {
-	Page    int  `json:"page"`
-	Limit   int   `json:"limit"`
-	OrderBy []string `json:"orderBy"`
-	ShowSQL bool
 }

@@ -2,7 +2,8 @@ package transport
 
 import (
 	"context"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
+	base "github.com/efrengarcial/framework/internal/platform/service"
+	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
 	kitlog "github.com/go-kit/kit/log"
 	"net/http"
@@ -10,14 +11,14 @@ import (
 )
 
 type userHandler struct {
-	service service2.UserService
+	service service.UserService
 	logger  kitlog.Logger
 }
 
 func (h *userHandler) createUser(c *gin.Context) {
 
 	ctx := context.Background()
-	var user *service2.User
+	var user *service.User
 	c.BindJSON(&user)
 
 	user, err := h.service.Create(ctx,user)
@@ -39,7 +40,7 @@ func (h *userHandler) createUser(c *gin.Context) {
 func (h *userHandler) updateUser(c *gin.Context) {
 
 	ctx := context.Background()
-	var user *service2.User
+	var user *service.User
 	c.BindJSON(&user)
 
 	user, err := h.service.Update(ctx, user)
@@ -59,14 +60,14 @@ func (h *userHandler) updateUser(c *gin.Context) {
 
 
 func (h *userHandler) findAll(c *gin.Context) {
-	pageable :=  new(service2.Pageable)
+	pageable :=  new(base.Pageable)
 	page, err := strconv.Atoi(c.Query("page"))
 	limit, err := strconv.Atoi(c.Query("limit"))
 	pageable.Page = page
 	pageable.Limit = limit
 	pageable.OrderBy= c.QueryArray("orderBy")
 
-	var users []service2.User
+	var users []service.User
 	//pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
 	_, err = h.service.FindAll(pageable, &users, "")
 	if err != nil {
@@ -74,7 +75,7 @@ func (h *userHandler) findAll(c *gin.Context) {
 		return
 	}
 
-	var response = struct { Users []service2.User `json:"users"` }{
+	var response = struct { Users []service.User `json:"users"` }{
 		Users: users,
 	}
 

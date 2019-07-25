@@ -1,18 +1,19 @@
 package repository
 
 import (
+	"github.com/efrengarcial/framework/internal/platform/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )
 
 type userGormRepository struct {
-	GormRepository
+	repository.GormRepository
 }
 
 func NewUserGormRepository(db *gorm.DB) service.UserRepository {
 
-	repo := GormRepository{db}
+	repo := repository.GormRepository{DB: db}
 	return &userGormRepository{repo}
 }
 

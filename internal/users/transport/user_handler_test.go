@@ -2,9 +2,9 @@ package transport
 
 import (
 	"bytes"
-	repository2 "github.com/efrengarcial/framework/internal/users/repository"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
-	"github.com/efrengarcial/framework/internal/userssers/pkg/util/dbutil"
+	"github.com/efrengarcial/framework/internal/platform/database"
+	"github.com/efrengarcial/framework/internal/users/repository"
+	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/jinzhu/gorm"
@@ -19,7 +19,10 @@ import (
 
 func setup() *gorm.DB {
 	// Initialize an in-memory database for full integration testing.
-	return  dbutil.Initialize("sqlite3", ":memory:")
+	db := database.Initialize("sqlite3", ":memory:")
+	db.AutoMigrate(&service.User{}, &service.Authority{}, &service.Privilege{})
+
+	return  db
 }
 
 func teardown(db *gorm.DB ) {
@@ -35,9 +38,9 @@ func TestCreateHandler(t *testing.T) {
 	logger = level.NewFilter(logger, level.AllowDebug())
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	repo := repository2.NewUserGormRepository(db)
-	us := service2.NewService(repo, log.With(logger, "component", "users"))
-	us = service2.NewLoggingService(logger, us)
+	repo := repository.NewUserGormRepository(db)
+	us := service.NewService(repo, log.With(logger, "component", "users"))
+	us = service.NewLoggingService(logger, us)
 	router := SetupUserRouter(us, logger)
 
 
@@ -69,18 +72,18 @@ func TestUpdateHandler(t *testing.T) {
 	logger = level.NewFilter(logger, level.AllowDebug())
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	repo := repository2.NewUserGormRepository(db)
-	us := service2.NewService(repo, log.With(logger, "component", "users"))
-	us = service2.NewLoggingService(logger, us)
+	repo := repository.NewUserGormRepository(db)
+	us := service.NewService(repo, log.With(logger, "component", "users"))
+	us = service.NewLoggingService(logger, us)
 	router := SetupUserRouter(us, logger)
 
-	user := &service2.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
+	user := &service.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
 	saveUser, err := repo.Insert(user)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var  users []service2.User
+	var  users []service.User
 	repo.FindAll(&users, "")
 
 	var jsonStr = []byte(`{"id" : "` +  strconv.FormatUint(saveUser.GetID(), 10) + `","login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)

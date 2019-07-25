@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/efrengarcial/framework/internal/platform/database"
+	base "github.com/efrengarcial/framework/internal/platform/service"
 )
 
 // Middleware describes a service middleware.
@@ -32,6 +33,6 @@ func (a authMiddleware) Update(ctx context.Context, user *User) (*User, error) {
 }
 
 
-func (a authMiddleware) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
+func (a authMiddleware) FindAll(pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
 	panic("implement me")
 }

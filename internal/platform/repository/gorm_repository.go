@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/efrengarcial/framework/internal/platform/database"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/jinzhu/gorm"
 )
 
@@ -10,11 +10,11 @@ type GormRepository struct {
 	DB *gorm.DB
 }
 
-func NewGormRepository(db *gorm.DB) service2.Repository {
+func NewGormRepository(db *gorm.DB) Repository {
 	return GormRepository{DB:db}
 }
 
-func (gr GormRepository) Insert(model service2.IModel) (service2.IModel, error){
+func (gr GormRepository) Insert(model service.IModel) (service.IModel, error){
 	if err := model.Validate(); err != nil{
 		return nil, err
 	}
@@ -24,14 +24,14 @@ func (gr GormRepository) Insert(model service2.IModel) (service2.IModel, error){
 	return model, nil
 }
 
-func (gr GormRepository) Update(model service2.IModel) error {
+func (gr GormRepository) Update(model service.IModel) error {
 	if err := model.Validate(); err != nil{
 		return err
 	}
 	return gr.DB.Save(model).Error
 }
 
-func (gr GormRepository) Save(model service2.IModel) (uint64, error){
+func (gr GormRepository) Save(model service.IModel) (uint64, error){
 	if err := model.Validate(); err != nil{
 		return 0, err
 	}
@@ -41,11 +41,11 @@ func (gr GormRepository) Save(model service2.IModel) (uint64, error){
 	return model.GetID(), nil
 }
 
-func (gr GormRepository) Find(receiver service2.IModel, id uint64) error {
+func (gr GormRepository) Find(receiver service.IModel, id uint64) error {
 	return gr.DB.Where("id = ?", id).Find(receiver).Error
 }
 
-func (gr GormRepository) FindFirst(receiver service2.IModel, where string, args ...interface{}) error {
+func (gr GormRepository) FindFirst(receiver service.IModel, where string, args ...interface{}) error {
 	return gr.DB.Where(where, args...).Limit(1).Find(receiver).Error
 }
 
@@ -54,7 +54,7 @@ func (gr GormRepository) FindAll(result interface{}, where string, args ...inter
 	return
 }
 
-func (gr GormRepository) FindAllPageable(pageable *service2.Pageable, result interface{},  where string, args ...interface{} ) (*database.Pagination, error) {
+func (gr GormRepository) FindAllPageable(pageable *service.Pageable, result interface{},  where string, args ...interface{} ) (*database.Pagination, error) {
 	//http://jinzhu.me/gorm/crud.html#query
 	//err := gr.DB.Table("users").Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&result)
 	//gr.DB = gr.DB.Model(pageable.Model).Where(where, args)
@@ -68,10 +68,10 @@ func (gr GormRepository) FindAllPageable(pageable *service2.Pageable, result int
 	return database.Pagging(p, result)
 }
 
-func (gr GormRepository) Delete(model service2.IModel, where string, args ...interface{}) error {
+func (gr GormRepository) Delete(model service.IModel, where string, args ...interface{}) error {
 	return gr.DB.Where(where, args...).Delete(&model).Error
 }
 
-func (gr GormRepository) NewRecord(model service2.IModel) bool {
+func (gr GormRepository) NewRecord(model service.IModel) bool {
 	return gr.DB.NewRecord(&model)
 }

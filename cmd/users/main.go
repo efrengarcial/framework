@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/efrengarcial/framework/internal/users/transport"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"net/http"
@@ -19,31 +19,12 @@ import (
 )
 
 const (
-	defaultPort       = "8080"
+	defaultPort       = "8282"
 	defaultDBHost     = "127.0.0.1"
 	defaultDBNme      = "db"
 	defaultDBUser     = "postgres"
 	defaultDBPassword = "password"
 )
-
-func Initialize(dbDriver string, dbURI string) *gorm.DB {
-
-	// Get database details from environment variables
-	db, err := gorm.Open(dbDriver, dbURI)
-	if err != nil {
-		panic("failed to connect database")
-	}
-	db.LogMode(true)
-
-	// Automatically migrates the user struct
-	// into database columns/types etc. This will
-	// check for changes and migrate them each time
-	// this service is restarted.
-	db.AutoMigrate(&service.User{}, &service.Authority{}, &service.Privilege{})
-
-	return db
-}
-
 
 func envString(env, fallback string) string {
 	e := os.Getenv(env)
@@ -82,12 +63,18 @@ func main() {
 	password := envString("DB_PASSWORD", defaultDBPassword)
 	// Creates a database connection and handles
 	// closing it again before exit.
-	db := Initialize("postgres",
+	db := database.Initialize("postgres",
 		fmt.Sprintf(
 			"host=%s user=%s dbname=%s sslmode=disable password=%s",
 			host, user, DBName, password))
 
 	defer db.Close()
+
+	// Automatically migrates the user struct
+	// into database columns/types etc. This will
+	// check for changes and migrate them each time
+	// this service is restarted.
+	db.AutoMigrate(&service.User{}, &service.Authority{}, &service.Privilege{})
 
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)

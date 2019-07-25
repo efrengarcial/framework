@@ -3,7 +3,9 @@ package repository
 import (
 	"database/sql/driver"
 	"github.com/DATA-DOG/go-sqlmock"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/platform/repository"
+	base "github.com/efrengarcial/framework/internal/platform/service"
+	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/go-test/deep"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -13,6 +15,7 @@ import (
 	"testing"
 	"time"
 )
+
 type AnyTime struct{}
 
 // Match satisfies sqlmock.Argument interface
@@ -31,8 +34,8 @@ func  Test_repository_Find(t *testing.T) {
 	defer DB.Close()
 	require.NoError(t, err)
 	DB.LogMode(true)
-	repository := NewGormRepository(DB)
-	user := new(service2.User)
+	repository := repository.NewGormRepository(DB)
+	user := new(service.User)
 
 	var (
 		id  uint64  = 1
@@ -48,7 +51,7 @@ func  Test_repository_Find(t *testing.T) {
 	err = repository.Find(user, id)
 
 	assert.NoError(t, err)
-	assert.Nil(t, deep.Equal(&service2.User{ Model : service2.Model{ ID: id}, Login: login}, user))
+	assert.Nil(t, deep.Equal(&service.User{ Model : base.Model{ ID: id}, Login: login}, user))
 }
 
 func Test_repository_Create(t *testing.T) {
@@ -63,9 +66,9 @@ func Test_repository_Create(t *testing.T) {
 	defer DB.Close()
 	require.NoError(t, err)
 	DB.LogMode(true)
-	repository := NewGormRepository(DB)
+	repository := repository.NewGormRepository(DB)
 
-	user := &service2.User{ Model : service2.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
@@ -95,9 +98,9 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 	defer DB.Close()
 	require.NoError(t, err)
 	DB.LogMode(true)
-	repository := NewGormRepository(DB)
+	repository := repository.NewGormRepository(DB)
 
-	authority := service2.Authority{Model : service2.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
+	authority := service.Authority{Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
 
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "fw_authority"  `)).
 		WithArgs(AnyTime{}, AnyTime{}, authority.CreatedBy, authority.LastModifiedBy, roleAdmin, tenantId).WillReturnRows(
@@ -105,11 +108,11 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 
 	repository.Insert(&authority)
 
-	existAuthority :=  service2.Authority{Model : service2.Model{ID: id}}
+	existAuthority :=  service.Authority{Model : base.Model{ID: id}}
 
-	user := &service2.User{ Model : service2.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk" ,
-		Authorities: []service2.Authority{existAuthority }}
+		Authorities: []service.Authority{existAuthority }}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
 		`INSERT INTO "fw_user" `)).
@@ -142,8 +145,8 @@ func Test_repository_Save(t *testing.T) {
 	defer DB.Close()
 	require.NoError(t, err)
 	DB.LogMode(true)
-	repository := NewGormRepository(DB)
-	user := &service2.User{ Model : service2.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
+	repository := repository.NewGormRepository(DB)
+	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	sql := regexp.QuoteMeta(
@@ -171,12 +174,12 @@ func  Test_repository_FindAll(t *testing.T) {
 	defer DB.Close()
 	require.NoError(t, err)
 	DB.LogMode(true)
-	repository := NewGormRepository(DB)
+	repository := repository.NewGormRepository(DB)
 
 	var (
 		id  uint64  = 1
 		login = "user"
-		users []service2.User
+		users []service.User
 	)
 
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -199,12 +202,12 @@ func  Test_repository_FindAllPageable(t *testing.T) {
 	defer DB.Close()
 	require.NoError(t, err)
 	DB.LogMode(true)
-	repository := NewGormRepository(DB)
+	repository := repository.NewGormRepository(DB)
 
 	var (
 		id  uint64  = 1
 		login = "user"
-		users []service2.User
+		users []service.User
 	)
 
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -217,7 +220,7 @@ func  Test_repository_FindAllPageable(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"count(*)"}).
 			AddRow(1))
 
-	pageable := service2.Pageable{Page: 1 , Limit: 10 , OrderBy: []string{"id desc"}}
+	pageable := base.Pageable{Page: 1 , Limit: 10 , OrderBy: []string{"id desc"}}
 	_, err  = repository.FindAllPageable( &pageable, &users, "id > 0 ")
 
 	assert.NoError(t, err)

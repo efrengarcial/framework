@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/efrengarcial/framework/internal/users/mocks"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -30,7 +31,7 @@ func init() {
 func TestInsert(t *testing.T) {
 	mockUserRepository :=  new(mocks.UserRepository)
 
-	mockAuthority := Authority{Model: Model{ID: 1}}
+	mockAuthority := Authority{Model: base.Model{ID: 1}}
 
 	mockUser := &User{
 		FirstName: "Juan",

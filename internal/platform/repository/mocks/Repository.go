@@ -4,7 +4,7 @@ package mocks
 
 import (
 	"github.com/efrengarcial/framework/internal/platform/database"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
+	service "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -14,14 +14,14 @@ type Repository struct {
 }
 
 // Delete provides a mock function with given fields: _a0, where, args
-func (_m *Repository) Delete(_a0 service2.IModel, where string, args ...interface{}) error {
+func (_m *Repository) Delete(_a0 service.IModel, where string, args ...interface{}) error {
 	var _ca []interface{}
 	_ca = append(_ca, _a0, where)
 	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(service2.IModel, string, ...interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(service.IModel, string, ...interface{}) error); ok {
 		r0 = rf(_a0, where, args...)
 	} else {
 		r0 = ret.Error(0)
@@ -31,11 +31,11 @@ func (_m *Repository) Delete(_a0 service2.IModel, where string, args ...interfac
 }
 
 // Find provides a mock function with given fields: receiver, id
-func (_m *Repository) Find(receiver service2.IModel, id uint64) error {
+func (_m *Repository) Find(receiver service.IModel, id uint64) error {
 	ret := _m.Called(receiver, id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(service2.IModel, uint64) error); ok {
+	if rf, ok := ret.Get(0).(func(service.IModel, uint64) error); ok {
 		r0 = rf(receiver, id)
 	} else {
 		r0 = ret.Error(0)
@@ -62,14 +62,14 @@ func (_m *Repository) FindAll(result interface{}, where string, args ...interfac
 }
 
 // FindAllPageable provides a mock function with given fields: pageable, result, where, args
-func (_m *Repository) FindAllPageable(pageable *service2.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
+func (_m *Repository) FindAllPageable(pageable *service.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
 	var _ca []interface{}
 	_ca = append(_ca, pageable, result, where)
 	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	var r0 *database.Pagination
-	if rf, ok := ret.Get(0).(func(*service2.Pageable, interface{}, string, ...interface{}) *database.Pagination); ok {
+	if rf, ok := ret.Get(0).(func(*service.Pageable, interface{}, string, ...interface{}) *database.Pagination); ok {
 		r0 = rf(pageable, result, where, args...)
 	} else {
 		if ret.Get(0) != nil {
@@ -78,7 +78,7 @@ func (_m *Repository) FindAllPageable(pageable *service2.Pageable, result interf
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*service2.Pageable, interface{}, string, ...interface{}) error); ok {
+	if rf, ok := ret.Get(1).(func(*service.Pageable, interface{}, string, ...interface{}) error); ok {
 		r1 = rf(pageable, result, where, args...)
 	} else {
 		r1 = ret.Error(1)
@@ -88,14 +88,14 @@ func (_m *Repository) FindAllPageable(pageable *service2.Pageable, result interf
 }
 
 // FindFirst provides a mock function with given fields: receiver, where, args
-func (_m *Repository) FindFirst(receiver service2.IModel, where string, args ...interface{}) error {
+func (_m *Repository) FindFirst(receiver service.IModel, where string, args ...interface{}) error {
 	var _ca []interface{}
 	_ca = append(_ca, receiver, where)
 	_ca = append(_ca, args...)
 	ret := _m.Called(_ca...)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(service2.IModel, string, ...interface{}) error); ok {
+	if rf, ok := ret.Get(0).(func(service.IModel, string, ...interface{}) error); ok {
 		r0 = rf(receiver, where, args...)
 	} else {
 		r0 = ret.Error(0)
@@ -105,20 +105,20 @@ func (_m *Repository) FindFirst(receiver service2.IModel, where string, args ...
 }
 
 // Insert provides a mock function with given fields: _a0
-func (_m *Repository) Insert(_a0 service2.IModel) (service2.IModel, error) {
+func (_m *Repository) Insert(_a0 service.IModel) (service.IModel, error) {
 	ret := _m.Called(_a0)
 
-	var r0 service2.IModel
-	if rf, ok := ret.Get(0).(func(service2.IModel) service2.IModel); ok {
+	var r0 service.IModel
+	if rf, ok := ret.Get(0).(func(service.IModel) service.IModel); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(service2.IModel)
+			r0 = ret.Get(0).(service.IModel)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(service2.IModel) error); ok {
+	if rf, ok := ret.Get(1).(func(service.IModel) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -128,11 +128,11 @@ func (_m *Repository) Insert(_a0 service2.IModel) (service2.IModel, error) {
 }
 
 // NewRecord provides a mock function with given fields: _a0
-func (_m *Repository) NewRecord(_a0 service2.IModel) bool {
+func (_m *Repository) NewRecord(_a0 service.IModel) bool {
 	ret := _m.Called(_a0)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(service2.IModel) bool); ok {
+	if rf, ok := ret.Get(0).(func(service.IModel) bool); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Get(0).(bool)
@@ -142,18 +142,18 @@ func (_m *Repository) NewRecord(_a0 service2.IModel) bool {
 }
 
 // Save provides a mock function with given fields: _a0
-func (_m *Repository) Save(_a0 service2.IModel) (uint64, error) {
+func (_m *Repository) Save(_a0 service.IModel) (uint64, error) {
 	ret := _m.Called(_a0)
 
 	var r0 uint64
-	if rf, ok := ret.Get(0).(func(service2.IModel) uint64); ok {
+	if rf, ok := ret.Get(0).(func(service.IModel) uint64); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Get(0).(uint64)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(service2.IModel) error); ok {
+	if rf, ok := ret.Get(1).(func(service.IModel) error); ok {
 		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
@@ -163,11 +163,11 @@ func (_m *Repository) Save(_a0 service2.IModel) (uint64, error) {
 }
 
 // Update provides a mock function with given fields: _a0
-func (_m *Repository) Update(_a0 service2.IModel) error {
+func (_m *Repository) Update(_a0 service.IModel) error {
 	ret := _m.Called(_a0)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(service2.IModel) error); ok {
+	if rf, ok := ret.Get(0).(func(service.IModel) error); ok {
 		r0 = rf(_a0)
 	} else {
 		r0 = ret.Error(0)

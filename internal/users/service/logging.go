@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/efrengarcial/framework/internal/platform/database"
+	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"time"
@@ -37,6 +38,6 @@ func (s *loggingService) Update(ctx context.Context, user *User) (*User, error) 
 }
 
 
-func (s *loggingService) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{})(*database.Pagination, error) {
+func (s *loggingService) FindAll(pageable *base.Pageable, result interface{}, where string, args ...interface{})(*database.Pagination, error) {
 	return s.FindAll(pageable, result, where, args...)
 }

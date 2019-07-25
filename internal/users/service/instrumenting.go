@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/efrengarcial/framework/internal/platform/database"
+	base "github.com/efrengarcial/framework/internal/platform/service"
 	"time"
 
 	"github.com/go-kit/kit/metrics"
@@ -38,6 +39,6 @@ func (s *instrumentingService) Update(ctx context.Context, user *User) (*User, e
 	return s.Update(ctx, user)
 }
 
-func (s *instrumentingService) FindAll(pageable *Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
+func (s *instrumentingService) FindAll(pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error) {
 	return s.FindAll(pageable, result, where, args...)
 }
