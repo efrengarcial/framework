@@ -1,4 +1,4 @@
-package transport
+package handlers
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func (h *authHandler) signIn(c *gin.Context) {
 	err := h.service.Auth(ctx, loginVM, token)
 
 	if err != nil {
-		encodeError1(err, h.logger, c)
+		encodeError(err, h.logger, c)
 		return
 	}
 

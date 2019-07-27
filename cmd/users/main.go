@@ -6,7 +6,7 @@ import (
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
-	"github.com/efrengarcial/framework/internal/users/transport"
+	"github.com/efrengarcial/framework/internal/users/handlers"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
@@ -99,7 +99,7 @@ func main() {
 	ts := service.NewTokenService()
 	as := service.NewAuthService(repo, ts, log.With(logger, "component", "auth"))
 
-	srv := transport.New(us, as, log.With(logger, "component", "http"))
+	srv := handlers.New(us, as, log.With(logger, "component", "http"))
 
 	errs := make(chan error, 2)
 	go func() {

@@ -4,6 +4,7 @@ import (
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 type GormRepository struct {
@@ -16,42 +17,53 @@ func NewGormRepository(db *gorm.DB) Repository {
 
 func (gr GormRepository) Insert(model service.IModel) (service.IModel, error){
 	if err := model.Validate(); err != nil{
-		return nil, err
+		return nil,  errors.WithStack(err)
 	}
 	if err := gr.DB.Create(model).Error; err != nil{
-		return nil, err
+		return nil,  errors.WithStack(err)
 	}
 	return model, nil
 }
 
 func (gr GormRepository) Update(model service.IModel) error {
 	if err := model.Validate(); err != nil{
-		return err
+		return  errors.WithStack(err)
 	}
-	return gr.DB.Save(model).Error
+	if err := gr.DB.Save(model).Error; err != nil{
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (gr GormRepository) Save(model service.IModel) (uint64, error){
 	if err := model.Validate(); err != nil{
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 	if err := gr.DB.Save(model).Error; err != nil{
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 	return model.GetID(), nil
 }
 
 func (gr GormRepository) Find(receiver service.IModel, id uint64) error {
-	return gr.DB.Where("id = ?", id).Find(receiver).Error
+	if err := gr.DB.Where("id = ?", id).Find(receiver).Error; err != nil{
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (gr GormRepository) FindFirst(receiver service.IModel, where string, args ...interface{}) error {
-	return gr.DB.Where(where, args...).Limit(1).Find(receiver).Error
+	if err := gr.DB.Where(where, args...).Limit(1).Find(receiver).Error; err != nil{
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (gr GormRepository) FindAll(result interface{}, where string, args ...interface{}) (err error){
-	err = gr.DB.Where(where, args...).Find(result).Error
-	return
+	if err := gr.DB.Where(where, args...).Find(result).Error; err != nil{
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (gr GormRepository) FindAllPageable(pageable *service.Pageable, result interface{},  where string, args ...interface{} ) (*database.Pagination, error) {
@@ -65,11 +77,15 @@ func (gr GormRepository) FindAllPageable(pageable *service.Pageable, result inte
 		OrderBy: pageable.OrderBy,
 		ShowSQL: pageable.ShowSQL,
 	}
-	return database.Pagging(p, result)
+	pagination, err := database.Pagging(p, result)
+	return pagination,  errors.WithStack(err)
 }
 
 func (gr GormRepository) Delete(model service.IModel, where string, args ...interface{}) error {
-	return gr.DB.Where(where, args...).Delete(&model).Error
+	if err :=gr.DB.Where(where, args...).Delete(&model).Error; err != nil{
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (gr GormRepository) NewRecord(model service.IModel) bool {

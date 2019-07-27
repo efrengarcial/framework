@@ -1,4 +1,4 @@
-package transport
+package handlers
 
 import (
 	"context"
@@ -23,7 +23,7 @@ func (h *userHandler) createUser(c *gin.Context) {
 
 	user, err := h.service.Create(ctx,user)
 	if err != nil {
-		encodeError1( err, h.logger, c)
+		encodeError( err, h.logger, c)
 		return
 	}
 
@@ -45,7 +45,7 @@ func (h *userHandler) updateUser(c *gin.Context) {
 
 	user, err := h.service.Update(ctx, user)
 	if err != nil {
-		encodeError1( err, h.logger, c)
+		encodeError( err, h.logger, c)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (h *userHandler) findAll(c *gin.Context) {
 	//pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
 	_, err = h.service.FindAll(pageable, &users, "")
 	if err != nil {
-		encodeError1( err, h.logger, c)
+		encodeError( err, h.logger, c)
 		return
 	}
 

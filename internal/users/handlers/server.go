@@ -1,4 +1,4 @@
-package transport
+package handlers
 
 import (
 	"fmt"
@@ -83,7 +83,7 @@ type stackTracer interface {
 	StackTrace() errors.StackTrace
 }
 
-func encodeError1(err error,  logger kitlog.Logger,c *gin.Context) {
+func encodeError(err error,  logger kitlog.Logger,c *gin.Context) {
 	var status int
 
 	switch err.(type) {
