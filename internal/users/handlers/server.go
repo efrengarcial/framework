@@ -59,7 +59,7 @@ func setupRouter(us service.UserService,as service.AuthService, logger kitlog.Lo
 }
 
 // New returns a new HTTP server.
-func New(us service.UserService,as service.AuthService, logger kitlog.Logger) *Server {
+func New(us service.UserService,as service.AuthService, logger kitlog.Logger) http.Handler  {
 	s := &Server{
 		UserService:  us,
 		AuthService: as,
