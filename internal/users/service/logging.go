@@ -38,6 +38,6 @@ func (s *loggingService) Update(ctx context.Context, user *User) (*User, error) 
 }
 
 
-func (s *loggingService) FindAll(pageable *base.Pageable, result interface{}, where string, args ...interface{})(*database.Pagination, error) {
-	return s.FindAll(pageable, result, where, args...)
+func (s *loggingService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{})(*database.Pagination, error) {
+	return s.FindAll(ctx, pageable, result, where, args...)
 }

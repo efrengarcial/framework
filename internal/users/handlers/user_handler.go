@@ -5,14 +5,14 @@ import (
 	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
-	kitlog "github.com/go-kit/kit/log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 )
 
 type userHandler struct {
 	service service.UserService
-	logger  kitlog.Logger
+	logger  *logrus.Logger
 }
 
 func (h *userHandler) createUser(c *gin.Context) {
@@ -69,7 +69,7 @@ func (h *userHandler) findAll(c *gin.Context) {
 
 	var users []service.User
 	//pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
-	_, err = h.service.FindAll(pageable, &users, "")
+	_, err = h.service.FindAll(c.Request.Context(), pageable, &users, "")
 	if err != nil {
 		encodeError( err, h.logger, c)
 		return

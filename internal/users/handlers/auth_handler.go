@@ -2,26 +2,26 @@ package handlers
 
 import (
 	"context"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
-	kitlog "github.com/go-kit/kit/log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
 
 type authHandler struct {
-	service service2.AuthService
-	logger  kitlog.Logger
+	service service.AuthService
+	logger  *logrus.Logger
 }
 
 
 func (h *authHandler) signIn(c *gin.Context) {
 	ctx := context.Background()
 
-	loginVM := new(service2.LoginVM)
+	loginVM := new(service.LoginVM)
 	c.BindJSON(&loginVM)
 
-	token:= new(service2.Token)
+	token:= new(service.Token)
 	err := h.service.Auth(ctx, loginVM, token)
 
 	if err != nil {

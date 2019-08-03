@@ -2,31 +2,20 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/efrengarcial/framework/internal/platform/web"
+	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	kitlog "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"strings"
 )
 
-// Server holds the dependencies for a HTTP server.
-type Server struct {
-	UserService service.UserService
-	AuthService service.AuthService
-
-	logger kitlog.Logger
-
-	router *gin.Engine
-}
-
-func SetupUserRouter(us service.UserService, logger kitlog.Logger) *gin.Engine {
-
-	//gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	router.Use(cors.Default())
+func setUserRouter(router *gin.Engine, us service.UserService, logger *logrus.Logger) {
 
 	v1 := router.Group("/api/v1")
 	{
@@ -35,44 +24,27 @@ func SetupUserRouter(us service.UserService, logger kitlog.Logger) *gin.Engine {
 		v1.PUT("/users", h.updateUser)
 		v1.GET("/users", h.findAll)
 	}
-
-	return router
 }
 
-func setupRouter(us service.UserService,as service.AuthService, logger kitlog.Logger) *gin.Engine {
-
-	//gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
-	router.Use(cors.Default())
-
-	v1 := router.Group("/api/v1")
-	{
-		h := userHandler{us, logger}
-		v1.POST("/users" , h.createUser)
-		v1.PUT("/users", h.updateUser)
-		v1.GET("/users", h.findAll)
-	}
-
+func setAuthRouter(router *gin.Engine, as service.AuthService, logger *logrus.Logger) {
 	a := authHandler{as, logger}
 	router.POST("/authenticate", a.signIn)
-	return router
 }
 
-// New returns a new HTTP server.
-func New(us service.UserService,as service.AuthService, logger kitlog.Logger) http.Handler  {
-	s := &Server{
-		UserService:  us,
-		AuthService: as,
-		logger:   logger,
-	}
+//New returns a new HTTP server.
+func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger) http.Handler  {
+	// Setup repositories
+	repo := repository.NewUserGormRepository(db)
+	us := service.NewService(repo, logger)
+	ts := service.NewTokenService()
+	as := service.NewAuthService(repo, ts, logger)
 
-	s.router = setupRouter(us, as, logger)
+	app := web.NewApp(shutdown, logger)
+	router := app.Engine
+	setUserRouter(router, us, logger)
+	setAuthRouter(router, as, logger)
 
-	return s
-}
-
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.router.ServeHTTP(w, r)
+	return app
 }
 
 type iErrBadRequest interface {
@@ -83,7 +55,7 @@ type stackTracer interface {
 	StackTrace() errors.StackTrace
 }
 
-func encodeError(err error,  logger kitlog.Logger,c *gin.Context) {
+func encodeError(err error,  logger *logrus.Logger,c *gin.Context) {
 	var status int
 
 	switch err.(type) {
@@ -99,7 +71,7 @@ func encodeError(err error,  logger kitlog.Logger,c *gin.Context) {
 				errorLog.WriteString(fmt.Sprintf("%+v \n\n", f))
 			}
 		}
-		level.Error(logger).Log("error", errorLog.String())
+		logger.Error("error", errorLog.String())
 		fmt.Printf("with stack trace => %+v \n\n", err)
 		status = http.StatusInternalServerError
 	}

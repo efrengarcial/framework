@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"github.com/go-kit/kit/log"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,11 +23,11 @@ type AuthService interface {
 type authService struct {
 	repo         UserRepository
 	tokenService TokenService
-	logger       log.Logger
+	logger       *logrus.Logger
 }
 
 // NewService creates and returns a new Auth service instance
-func NewAuthService(rep UserRepository, token TokenService, logger log.Logger) AuthService {
+func NewAuthService(rep UserRepository, token TokenService, logger *logrus.Logger) AuthService {
 	return &authService {
 		repo: rep,
 		tokenService: token,

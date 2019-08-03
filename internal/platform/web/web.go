@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	kitlog "github.com/go-kit/kit/log"
+	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/tracecontext"
 	"go.opencensus.io/trace"
@@ -27,10 +27,6 @@ type Values struct {
 	StatusCode int
 }
 
-// A Handler is a type that handles an http request within our own little mini
-// framework.
-type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request, params map[string]string) error
-
 // App is the entrypoint into our application and what configures our context
 // object for each of our http handlers. Feel free to add any configuration
 // data/logic on this App struct
@@ -38,20 +34,19 @@ type App struct {
 	*gin.Engine
 	och      *ochttp.Handler
 	shutdown chan os.Signal
-	logger   kitlog.Logger
-	mw       []Middleware
+	logger   *logrus.Logger
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
-func NewApp(shutdown chan os.Signal, logger kitlog.Logger, mw ...Middleware) *App {
+func NewApp(shutdown chan os.Signal, logger *logrus.Logger) *App {
 	//gin.SetMode(gin.ReleaseMode)
 	engine := gin.Default()
 	engine.Use(cors.Default())
+	engine.Use(Trace())
 	app := App{
 		Engine:   engine,
 		shutdown: shutdown,
 		logger:   logger,
-		mw:       mw,
 	}
 
 	// Create an OpenCensus HTTP Handler which wraps the router. This will start
@@ -71,23 +66,17 @@ func NewApp(shutdown chan os.Signal, logger kitlog.Logger, mw ...Middleware) *Ap
 // SignalShutdown is used to gracefully shutdown the app when an integrity
 // issue is identified.
 func (a *App) SignalShutdown() {
-	a.logger.Log("error returned from handler indicated integrity issue, shutting down service")
-	a.shutdown <- syscall.SIGSTOP
+	a.logger.Error("error returned from handler indicated integrity issue, shutting down service")
+	a.shutdown <- syscall.SIGKILL
 }
 
-// Handle is our mechanism for mounting Handlers for a given HTTP verb and path
-// pair, this makes for really easy, convenient routing.
-func (a *App) Handle(verb, path string, handler Handler, mw ...Middleware) {
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.och.ServeHTTP(w, r)
+}
 
-	// First wrap handler specific middleware around this handler.
-	handler = wrapMiddleware(mw, handler)
-
-	// Add the application's general middleware to the handler chain.
-	handler = wrapMiddleware(a.mw, handler)
-
-	// The function to execute for each request.
-	h := func(w http.ResponseWriter, r *http.Request, params map[string]string) {
-		ctx, span := trace.StartSpan(r.Context(), "internal.platform.web")
+func Trace() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, span := trace.StartSpan(c.Request.Context(), "internal.platform.web")
 		defer span.End()
 
 		// Set the context with the required values to
@@ -96,21 +85,6 @@ func (a *App) Handle(verb, path string, handler Handler, mw ...Middleware) {
 			TraceID: span.SpanContext().TraceID.String(),
 			Now:     time.Now(),
 		}
-		ctx = context.WithValue(ctx, KeyValues, &v)
-
-		// Call the wrapped handler functions.
-		if err := handler(ctx, w, r, params); err != nil {
-			a.logger.Log("*****> critical shutdown error: %v", err)
-			a.SignalShutdown()
-			return
-		}
+		context.WithValue(ctx, KeyValues, &v)
 	}
-
-	// Add this handler for the specified verb and route.
-	a.Engine..TreeMux.Handle(verb, path, h)
-}
-
-
-func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	a.ServeHTTP(w, r)
 }

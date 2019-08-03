@@ -1,74 +1,101 @@
 package main
 
 import (
-	"flag"
+	"context"
+	"contrib.go.opencensus.io/exporter/zipkin"
 	"fmt"
+	"github.com/efrengarcial/framework/internal/platform/conf"
 	"github.com/efrengarcial/framework/internal/platform/database"
-	"github.com/efrengarcial/framework/internal/users/repository"
-	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/efrengarcial/framework/internal/users/handlers"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
-	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	"github.com/efrengarcial/framework/internal/users/service"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	openzipkin "github.com/openzipkin/zipkin-go"
+	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
-const (
-	defaultPort       = "8282"
-	defaultDBHost     = "127.0.0.1"
-	defaultDBNme      = "db"
-	defaultDBUser     = "postgres"
-	defaultDBPassword = "password"
-)
-
-func envString(env, fallback string) string {
-	e := os.Getenv(env)
-	if e == "" {
-		return fallback
-	}
-	return e
-}
-
+// Create a new instance of the logger. You can have any number of instances.
+var logger = log.New()
 
 func main() {
-	var (
-		addr= envString("PORT", defaultPort)
-		//rsurl= envString("ROUTINGSERVICE_URL", defaultRoutingServiceURL)
-		//dburl= envString("MONGODB_URL", defaultMongoDBURL)
-		//dbname= envString("DB_NAME", defaultDBName)
-
-		httpAddr = flag.String("http.addr", ":"+addr, "HTTP listen address")
-		//routingServiceURL = flag.String("service.routing", rsurl, "routing service URL")
-		//mongoDBURL = flag.String("db.url", dburl, "MongoDB URL")
-		//databaseName = flag.String("db.name", dbname, "MongoDB database name")
-		//inmemory = flag.Bool("inmem", false, "use in-memory repositories")
-	)
-
-	flag.Parse()
-
+	// The API for setting attributes is a little different than the package level
+	// exported logger. See Godoc.
 	//https://medium.com/google-cloud/hidden-super-powers-of-stackdriver-logging-ca110dae7e74
-	var logger log.Logger
-	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
-	logger = level.NewFilter(logger, level.AllowInfo())
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+	logger.Out = os.Stdout
+	logger.Level = log.InfoLevel
+	//logger.Formatter = &log.JSONFormatter{}
 
-	host := envString("DB_HOST", defaultDBHost)
-	user :=  envString("DB_USER", defaultDBUser)
-	DBName := envString("DB_NAME", defaultDBNme)
-	password := envString("DB_PASSWORD", defaultDBPassword)
-	// Creates a database connection and handles
-	// closing it again before exit.
-	db := database.Initialize("postgres",
-		fmt.Sprintf(
-			"host=%s user=%s dbname=%s sslmode=disable password=%s",
-			host, user, DBName, password))
+	if err := run(); err != nil {
+		logger.Error("error :", err)
+		os.Exit(1)
+	}
+}
 
-	defer db.Close()
+func run()  error {
+
+	// =========================================================================
+	// Configuration
+	var cfg struct {
+		Web struct {
+			APIHost         string        `conf:"default:0.0.0.0:3000"`
+			DebugHost       string        `conf:"default:0.0.0.0:4000"`
+			ReadTimeout     time.Duration `conf:"default:5s"`
+			WriteTimeout    time.Duration `conf:"default:5s"`
+			ShutdownTimeout time.Duration `conf:"default:5s"`
+		}
+		DB struct {
+			User       string `conf:"default:postgres"`
+			Password   string `conf:"default:password,noprint"`
+			Host       string `conf:"default:0.0.0.0"`
+			Name       string `conf:"default:postgres"`
+			DisableTLS bool   `conf:"default:true"`
+		}
+		Zipkin struct {
+			LocalEndpoint string  `conf:"default:0.0.0.0:3000"`
+			ReporterURI   string  `conf:"default:http://zipkin:9411/api/v2/spans"`
+			ServiceName   string  `conf:"default:users-api"`
+			Probability   float64 `conf:"default:0.05"`
+		}
+	}
+
+	if err := conf.Parse(os.Args[1:], "USERS", &cfg); err != nil {
+		if err == conf.ErrHelpWanted {
+			usage, err := conf.Usage("USERS", &cfg)
+			if err != nil {
+				return errors.Wrap(err, "generating config usage")
+			}
+			fmt.Println(usage)
+			return nil
+		}
+		return errors.Wrap(err, "parsing config")
+	}
+
+	// =========================================================================
+	// Start Database
+
+	logger.Info("main : Started : Initializing database support")
+
+	db, err := database.Open(database.Config{
+		User:       cfg.DB.User,
+		Password:   cfg.DB.Password,
+		Host:       cfg.DB.Host,
+		Name:       cfg.DB.Name,
+		DisableTLS: cfg.DB.DisableTLS,
+	})
+	if err != nil {
+		return errors.Wrap(err, "connecting to db")
+	}
+	defer func() {
+		logger.Info("main : Database Stopping : %s", cfg.DB.Host)
+		db.Close()
+	}()
 
 	// Automatically migrates the user struct
 	// into database columns/types etc. This will
@@ -76,44 +103,91 @@ func main() {
 	// this service is restarted.
 	db.AutoMigrate(&service.User{}, &service.Authority{}, &service.Privilege{})
 
-	// Setup repositories
-	repo := repository.NewUserGormRepository(db)
+	// =========================================================================
+	// Start Tracing Support
 
-	fieldKeys := []string{"method"}
-	us := service.NewService(repo, log.With(logger, "component", "users"))
-	us = service.NewInstrumentingService(
-		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
-			Namespace: "api",
-			Subsystem: "user_service",
-			Name:      "request_count",
-			Help:      "Number of requests received.",
-		}, fieldKeys),
-		kitprometheus.NewSummaryFrom(stdprometheus.SummaryOpts{
-			Namespace: "api",
-			Subsystem: "user_service",
-			Name:      "request_latency_microseconds",
-			Help:      "Total duration of requests in microseconds.",
-		}, fieldKeys),
-		us,
-	)
-	ts := service.NewTokenService()
-	as := service.NewAuthService(repo, ts, log.With(logger, "component", "auth"))
+	logger.Info("main : Started : Initializing zipkin tracing support")
 
-	srv := handlers.New(us, as, log.With(logger, "component", "http"))
+	localEndpoint, err := openzipkin.NewEndpoint("users-api", cfg.Zipkin.LocalEndpoint)
+	if err != nil {
+		return err
+	}
 
-	errs := make(chan error, 2)
-	go func() {
-		logger.Log("transport", "http", "address", *httpAddr, "msg", "listening")
-		errs <- http.ListenAndServe(*httpAddr, srv)
-	}()
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT)
-		errs <- fmt.Errorf("%s", <-c)
+	reporter := zipkinHTTP.NewReporter(cfg.Zipkin.ReporterURI)
+	ze := zipkin.NewExporter(reporter, localEndpoint)
+
+	trace.RegisterExporter(ze)
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	/*trace.ApplyConfig(trace.Config{
+		DefaultSampler: trace.ProbabilitySampler(cfg.Zipkin.Probability),
+	})*/
+
+	defer func() {
+		log.Printf("main : Tracing Stopping : %s", cfg.Zipkin.LocalEndpoint)
+		reporter.Close()
 	}()
 
-	logger.Log("terminated", <-errs)
+	// =========================================================================
+	// Start API Service
 
+	logger.Info("main : Started : Initializing API support")
 
+	// Make a channel to listen for an interrupt or terminate signal from the OS.
+	// Use a buffered channel because the signal package requires it.
+	//https://gobyexample.com/signals
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
+	api := http.Server{
+		Addr:         cfg.Web.APIHost,
+		Handler:       handlers.New(shutdown, db, logger),
+		ReadTimeout:  cfg.Web.ReadTimeout,
+		WriteTimeout: cfg.Web.WriteTimeout,
+	}
+
+	// Make a channel to listen for errors coming from the listener. Use a
+	// buffered channel so the goroutine can exit if we don't collect this error.
+	serverErrors := make(chan error, 1)
+
+	// Start the service listening for requests.
+	go func() {
+		logger.WithFields(log.Fields{
+			"transport": "http",
+			"address":    api.Addr,
+		}).Info("msg", "listening")
+		serverErrors <- api.ListenAndServe()
+	}()
+
+	// =========================================================================
+	// Shutdown
+
+	// Blocking main and waiting for shutdown.
+	select {
+	case err := <-serverErrors:
+		return errors.Wrap(err, "starting server")
+
+	case sig := <-shutdown:
+		logger.Info("main : %v : Start shutdown", sig)
+
+		// Give outstanding requests a deadline for completion.
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
+		defer cancel()
+
+		// Asking listener to shutdown and load shed.
+		err := api.Shutdown(ctx)
+		if err != nil {
+			logger.Info("main : Graceful shutdown did not complete in %v : %v", cfg.Web.ShutdownTimeout, err)
+			err = api.Close()
+		}
+
+		// Log the status of this shutdown.
+		switch {
+		case sig == syscall.SIGKILL: // SIGSTOP (linux)
+			return errors.New("integrity issue caused shutdown")
+		case err != nil:
+			return errors.Wrap(err, "could not stop server gracefully")
+		}
+	}
+
+	return nil
 }

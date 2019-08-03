@@ -5,7 +5,8 @@ import (
 	"github.com/efrengarcial/framework/internal/platform"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	base "github.com/efrengarcial/framework/internal/platform/service"
-	"github.com/go-kit/kit/log"
+	"github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
@@ -16,18 +17,18 @@ import (
 type UserService interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
-	FindAll(pageable *base.Pageable, result interface{},  where string, args ...interface{})(*database.Pagination, error)
+	FindAll(ctx context.Context, pageable *base.Pageable, result interface{},  where string, args ...interface{})(*database.Pagination, error)
 }
 
 
 // service implements the User Service
 type userService struct {
 	repository UserRepository
-	logger     log.Logger
+	logger     *logrus.Logger
 }
 
 // NewService creates and returns a new User service instance
-func NewService(rep UserRepository, logger log.Logger) UserService {
+func NewService(rep UserRepository, logger *logrus.Logger) UserService {
 	return &userService {
 		repository: rep,
 		logger:     logger,
@@ -102,6 +103,8 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 }
 
 
-func (service *userService) FindAll(pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error){
+func (service *userService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error){
+	ctx, span := trace.StartSpan(ctx, "user.service.FindAll")
+	defer span.End()
 	return service.repository.FindAllPageable(pageable, result, where, args...)
 }

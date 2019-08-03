@@ -5,10 +5,9 @@ import (
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -33,16 +32,12 @@ func teardown(db *gorm.DB ) {
 func TestCreateHandler(t *testing.T) {
 	db := setup()
 
-	var logger log.Logger
-	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
-	logger = level.NewFilter(logger, level.AllowDebug())
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-
-	repo := repository.NewUserGormRepository(db)
-	us := service.NewService(repo, log.With(logger, "component", "users"))
-	us = service.NewLoggingService(logger, us)
-	router := SetupUserRouter(us, logger)
-
+	logger := log.New()
+	logger.Out = os.Stdout
+	logger.Level = log.InfoLevel
+	logger.Formatter = &log.JSONFormatter{}
+	shutdown := make(chan os.Signal, 1)
+	server := New(shutdown, db, logger)
 
 	//user := &model.User{Login:"efren.gl" , Email:"efren.gl@gmail.com" }
 	//repo.Save(user)
@@ -57,7 +52,7 @@ func TestCreateHandler(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
 
@@ -67,16 +62,14 @@ func TestCreateHandler(t *testing.T) {
 func TestUpdateHandler(t *testing.T) {
 	db := setup()
 
-	var logger log.Logger
-	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
-	logger = level.NewFilter(logger, level.AllowDebug())
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+	logger := log.New()
+	logger.Out = os.Stdout
+	logger.Level = log.InfoLevel
+	logger.Formatter = &log.JSONFormatter{}
 
 	repo := repository.NewUserGormRepository(db)
-	us := service.NewService(repo, log.With(logger, "component", "users"))
-	us = service.NewLoggingService(logger, us)
-	router := SetupUserRouter(us, logger)
-
+	shutdown := make(chan os.Signal, 1)
+	server := New(shutdown, db, logger)
 	user := &service.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
 	saveUser, err := repo.Insert(user)
 	if err != nil {
@@ -96,7 +89,7 @@ func TestUpdateHandler(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
