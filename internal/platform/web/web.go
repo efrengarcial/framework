@@ -70,7 +70,7 @@ func (a *App) SignalShutdown() {
 	a.shutdown <- syscall.SIGKILL
 }
 
-func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a *App) ServeHTTP1(w http.ResponseWriter, r *http.Request) {
 	a.och.ServeHTTP(w, r)
 }
 

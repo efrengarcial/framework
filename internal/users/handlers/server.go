@@ -2,6 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"strings"
+
 	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
@@ -10,9 +14,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"strings"
 )
 
 func setUserRouter(router *gin.Engine, us service.UserService, logger *logrus.Logger) {
