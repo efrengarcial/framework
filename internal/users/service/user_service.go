@@ -6,7 +6,6 @@ import (
 	"github.com/efrengarcial/framework/internal/platform/database"
 	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/trace"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
@@ -47,12 +46,12 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement","idexists")
 	}
 
-	if  existingUser  , err = service.repository.FindOneByLogin(strings.ToLower(user.Login)); existingUser != nil {
+	if  existingUser  , err = service.repository.FindOneByLogin(ctx, strings.ToLower(user.Login)); existingUser != nil {
 		return nil, NewErrLoginAlreadyUsed()
 	}
 	if err != nil { return nil, err }
 
-	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email));  existingUser != nil {
+	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(user.Email));  existingUser != nil {
 		return nil, NewErrEmailAlreadyUsed()
 	}
 	if err != nil { return nil, err}
@@ -72,7 +71,7 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 	user.ResetDate = time.Now()
 	user.Activated = true
 
-	newUser, err  := service.repository.Insert(user)
+	newUser, err  := service.repository.Insert(ctx, user)
 	if err != nil { return nil, err}
 
 
@@ -86,12 +85,12 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 		existingUser *User
 	)
 
-	if  existingUser  , err =  service.repository.FindOneByEmail(strings.ToLower(user.Email)); existingUser != nil && user.ID !=  existingUser.ID {
+	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(user.Email)); existingUser != nil && user.ID !=  existingUser.ID {
 		return nil, NewErrEmailAlreadyUsed()
 	}
 	if err != nil { return nil, err }
 
-	if  existingUser  , err =  service.repository.FindOneByLogin(strings.ToLower(user.Login)); existingUser != nil && user.ID !=  existingUser.ID {
+	if  existingUser  , err =  service.repository.FindOneByLogin(ctx, strings.ToLower(user.Login)); existingUser != nil && user.ID !=  existingUser.ID {
 		return nil, NewErrLoginAlreadyUsed()
 	}
 	if err != nil { return nil, err }
@@ -104,7 +103,5 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 
 
 func (service *userService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error){
-	ctx, span := trace.StartSpan(ctx, "user.service.FindAll")
-	defer span.End()
-	return service.repository.FindAllPageable(pageable, result, where, args...)
+	return service.repository.FindAllPageable(ctx, pageable, result, where, args...)
 }

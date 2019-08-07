@@ -11,14 +11,12 @@ require (
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-kit/kit v0.8.0
-	github.com/go-logfmt/logfmt v0.3.0 // indirect
-	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-test/deep v1.0.1
 	github.com/google/go-cmp v0.2.0
 	github.com/jinzhu/gorm v1.9.7
-	github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515 // indirect
 	github.com/openzipkin/zipkin-go v0.1.6
 	github.com/pkg/errors v0.8.1
+	github.com/sagikazarmark/go-gin-gorm-opencensus v0.0.0-20190530122219-5cd3c9b414a5
 	github.com/sirupsen/logrus v1.2.0
 	github.com/stretchr/testify v1.3.0
 	go.opencensus.io v0.21.0

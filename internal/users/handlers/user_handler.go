@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
@@ -17,11 +16,10 @@ type userHandler struct {
 
 func (h *userHandler) createUser(c *gin.Context) {
 
-	ctx := context.Background()
 	var user *service.User
 	c.BindJSON(&user)
 
-	user, err := h.service.Create(ctx,user)
+	user, err := h.service.Create(c.Request.Context(),user)
 	if err != nil {
 		encodeError( err, h.logger, c)
 		return
@@ -39,11 +37,10 @@ func (h *userHandler) createUser(c *gin.Context) {
 
 func (h *userHandler) updateUser(c *gin.Context) {
 
-	ctx := context.Background()
 	var user *service.User
 	c.BindJSON(&user)
 
-	user, err := h.service.Update(ctx, user)
+	user, err := h.service.Update(c.Request.Context(), user)
 	if err != nil {
 		encodeError( err, h.logger, c)
 		return

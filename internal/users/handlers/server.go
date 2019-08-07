@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"go.opencensus.io/plugin/ochttp"
 	"net/http"
 	"os"
 	"strings"
@@ -21,9 +22,15 @@ func setUserRouter(router *gin.Engine, us service.UserService, logger *logrus.Lo
 	v1 := router.Group("/api/v1")
 	{
 		h := userHandler{us, logger}
-		v1.POST("/users" , h.createUser)
-		v1.PUT("/users", h.updateUser)
-		v1.GET("/users", h.findAll)
+		v1.POST("/users" , func(c *gin.Context) {
+			ochttp.SetRoute(c.Request.Context(), "/users")
+		}, h.createUser)
+		v1.PUT("/users",func(c *gin.Context) {
+			ochttp.SetRoute(c.Request.Context(), "/users")
+		}, h.updateUser)
+		v1.GET("/users",func(c *gin.Context) {
+			ochttp.SetRoute(c.Request.Context(), "/users")
+		}, h.findAll)
 	}
 }
 

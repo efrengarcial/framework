@@ -12,6 +12,7 @@ import (
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
 	"github.com/pkg/errors"
+	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
 	log "github.com/sirupsen/logrus"
 	"go.opencensus.io/trace"
 	"net/http"
@@ -30,7 +31,7 @@ func main() {
 	//https://medium.com/google-cloud/hidden-super-powers-of-stackdriver-logging-ca110dae7e74
 	logger.Out = os.Stdout
 	logger.Level = log.InfoLevel
-	//logger.Formatter = &log.JSONFormatter{}
+	logger.Formatter = &log.JSONFormatter{}
 
 	if err := run(); err != nil {
 		logger.Error("error :", err)
@@ -96,6 +97,9 @@ func run()  error {
 		logger.Info("main : Database Stopping : %s", cfg.DB.Host)
 		db.Close()
 	}()
+
+	// Register instrumentation callbacks
+	ocgorm.RegisterCallbacks(db)
 
 	// Automatically migrates the user struct
 	// into database columns/types etc. This will

@@ -1,10 +1,12 @@
 package repository
 
 import (
+	"context"
 	"github.com/efrengarcial/framework/internal/platform/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
 )
 
 type userGormRepository struct {
@@ -35,10 +37,11 @@ func (repo *userGormRepository) GetByLogin(login string) (*service.User, error) 
 	return user, nil
 }
 
-func (repo *userGormRepository) FindOneByLogin(login string) (*service.User, error) {
+func (repo *userGormRepository) FindOneByLogin(ctx context.Context, login string) (*service.User, error) {
 	user := &service.User{}
+	orm := ocgorm.WithContext(ctx, repo.DB)
 	var err error
-	err = repo.DB.Where("login = ?", login).First(&user).Error
+	err = orm.Where("login = ?", login).First(&user).Error
 
 	if gorm.IsRecordNotFoundError(err) {
 		return nil, nil
@@ -51,10 +54,11 @@ func (repo *userGormRepository) FindOneByLogin(login string) (*service.User, err
 	return user, nil
 }
 
-func (repo *userGormRepository) FindOneByEmail(login string) (*service.User, error) {
+func (repo *userGormRepository) FindOneByEmail(ctx context.Context, login string) (*service.User, error) {
 	user := &service.User{}
+	orm := ocgorm.WithContext(ctx, repo.DB)
 	var err error
-	err = repo.DB.Where("email = ?", login).First(&user).Error
+	err = orm.Where("email = ?", login).First(&user).Error
 
 	if gorm.IsRecordNotFoundError(err) {
 		return nil, nil

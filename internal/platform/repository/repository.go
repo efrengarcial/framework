@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/platform/service"
 )
@@ -9,7 +10,7 @@ import (
 type Repository interface {
 
 	// Insert puts a new instance of the give Model in the database
-	Insert(model service.IModel) (service.IModel, error)
+	Insert(ctx context.Context, model service.IModel) (service.IModel, error)
 
 	Update(model service.IModel) error
 
@@ -21,7 +22,7 @@ type Repository interface {
 
 	FindAll(result interface{}, where string, args ...interface{}) (err error)
 
-	FindAllPageable(pageable *service.Pageable, result interface{},  where string, args ...interface{}) (*database.Pagination, error)
+	FindAllPageable(ctx context.Context, pageable *service.Pageable, result interface{},  where string, args ...interface{}) (*database.Pagination, error)
 
 	Delete(model service.IModel, where string, args ...interface{}) error
 
