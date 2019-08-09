@@ -21,8 +21,7 @@ func NewUserGormRepository(db *gorm.DB) service.UserRepository {
 
 func (repo *userGormRepository) GetByEmail(email string) (*service.User, error) {
 	user := &service.User{}
-	if err := repo.DB.Where("email = ?", email).
-		First(&user).Error; err != nil {
+	if err := repo.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, errors.WithStack(err)
 	}
 	return user, nil
@@ -30,8 +29,7 @@ func (repo *userGormRepository) GetByEmail(email string) (*service.User, error) 
 
 func (repo *userGormRepository) GetByLogin(login string) (*service.User, error) {
 	user := &service.User{}
-	if err := repo.DB.Where("login = ?", login).
-		First(&user).Error; err != nil {
+	if err := repo.DB.Where("login = ?", login).First(&user).Error; err != nil {
 		return nil, errors.WithStack(err)
 	}
 	return user, nil

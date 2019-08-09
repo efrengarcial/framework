@@ -24,7 +24,7 @@ type Repository interface {
 
 	FindAllPageable(ctx context.Context, pageable *service.Pageable, result interface{},  where string, args ...interface{}) (*database.Pagination, error)
 
-	Delete(model service.IModel, where string, args ...interface{}) error
+	Delete(model service.IModel) error
 
 	// NewRecord check if the model exist in the store
 	NewRecord(model service.IModel) bool

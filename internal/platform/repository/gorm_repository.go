@@ -85,8 +85,8 @@ func (gr GormRepository) FindAllPageable(ctx context.Context, pageable *service.
 	return pagination,  errors.WithStack(err)
 }
 
-func (gr GormRepository) Delete(model service.IModel, where string, args ...interface{}) error {
-	if err :=gr.DB.Where(where, args...).Delete(&model).Error; err != nil{
+func (gr GormRepository) Delete(model service.IModel) error {
+	if err :=gr.DB.Delete(&model).Error; err != nil{
 		return errors.WithStack(err)
 	}
 	return nil
