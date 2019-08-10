@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql/driver"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/efrengarcial/framework/internal/platform/repository"
@@ -67,7 +68,6 @@ func Test_repository_Create(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-
 	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
@@ -78,7 +78,7 @@ func Test_repository_Create(t *testing.T) {
 		WillReturnRows(
 			sqlmock.NewRows([]string{"id"}).AddRow(id))
 
-	newUser , err := repository.Insert(user)
+	newUser , err := repository.Insert(context.Background(), user)
 	log.Println(newUser.GetID())
 
 	assert.NoError(t, err)
@@ -106,7 +106,7 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 		WithArgs(AnyTime{}, AnyTime{}, authority.CreatedBy, authority.LastModifiedBy, roleAdmin, tenantId).WillReturnRows(
 		sqlmock.NewRows([]string{"id"}).AddRow(id))
 
-	repository.Insert(&authority)
+	repository.Insert(context.Background(), &authority)
 
 	existAuthority :=  service.Authority{Model : base.Model{ID: id}}
 
@@ -126,7 +126,7 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "fw_user_authority"  `)).
 		WithArgs(id, id, id, id).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	newUser , err := repository.Insert(user)
+	newUser , err := repository.Insert(context.Background(), user)
 	log.Println(newUser.GetID())
 
 	assert.NoError(t, err)
@@ -221,7 +221,7 @@ func  Test_repository_FindAllPageable(t *testing.T) {
 			AddRow(1))
 
 	pageable := base.Pageable{Page: 1 , Limit: 10 , OrderBy: []string{"id desc"}}
-	_, err  = repository.FindAllPageable( &pageable, &users, "id > 0 ")
+	_, err  = repository.FindAllPageable(context.Background(), &pageable, &users, "id > 0 ")
 
 	assert.NoError(t, err)
 	assert.Len(t, users, 1)

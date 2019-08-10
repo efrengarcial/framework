@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
@@ -71,7 +72,7 @@ func TestUpdateHandler(t *testing.T) {
 	shutdown := make(chan os.Signal, 1)
 	server := New(shutdown, db, logger)
 	user := &service.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
-	saveUser, err := repo.Insert(user)
+	saveUser, err := repo.Insert(context.Background(), user)
 	if err != nil {
 		t.Fatal(err)
 	}

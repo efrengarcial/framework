@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/platform/service"
 )
 
@@ -22,7 +21,7 @@ type Repository interface {
 
 	FindAll(result interface{}, where string, args ...interface{}) (err error)
 
-	FindAllPageable(ctx context.Context, pageable *service.Pageable, result interface{},  where string, args ...interface{}) (*database.Pagination, error)
+	FindAllPageable(ctx context.Context, pageable *service.Pageable, result interface{},  where string, args ...interface{}) (*service.Pagination, error)
 
 	Delete(model service.IModel) error
 

@@ -3,6 +3,7 @@ module github.com/efrengarcial/framework
 go 1.12
 
 require (
+	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	contrib.go.opencensus.io/exporter/zipkin v0.1.1
 	github.com/DATA-DOG/go-sqlmock v1.3.3
 	github.com/Masterminds/goutils v1.1.0

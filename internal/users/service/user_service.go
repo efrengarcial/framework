@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/efrengarcial/framework/internal/platform"
-	"github.com/efrengarcial/framework/internal/platform/database"
 	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +15,7 @@ import (
 type UserService interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
-	FindAll(ctx context.Context, pageable *base.Pageable, result interface{},  where string, args ...interface{})(*database.Pagination, error)
+	FindAll(ctx context.Context, pageable *base.Pageable, result interface{},  where string, args ...interface{})(*base.Pagination, error)
 }
 
 
@@ -27,7 +26,7 @@ type userService struct {
 }
 
 // NewService creates and returns a new User service instance
-func NewService(rep UserRepository, logger *logrus.Logger) UserService {
+func NewService(rep UserRepository, logger *logrus.Logger) *userService {
 	return &userService {
 		repository: rep,
 		logger:     logger,
@@ -102,6 +101,6 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 }
 
 
-func (service *userService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*database.Pagination, error){
+func (service *userService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*base.Pagination, error){
 	return service.repository.FindAllPageable(ctx, pageable, result, where, args...)
 }

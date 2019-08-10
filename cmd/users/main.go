@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"contrib.go.opencensus.io/exporter/zipkin"
+	"contrib.go.opencensus.io/exporter/prometheus"
 	"fmt"
 	"github.com/efrengarcial/framework/internal/platform/conf"
 	"github.com/efrengarcial/framework/internal/platform/database"
@@ -11,9 +12,12 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/pkg/errors"
 	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"net/http"
 	"os"
@@ -130,6 +134,33 @@ func run()  error {
 		log.Printf("main : Tracing Stopping : %s", cfg.Zipkin.LocalEndpoint)
 		reporter.Close()
 	}()
+	// =========================================================================
+	// Create prometheus exporter
+	pe, err := prometheus.NewExporter(prometheus.Options{
+		Registry: prom.DefaultGatherer.(*prom.Registry),
+	})
+	if err != nil {
+		return err
+	}
+	// Register prometheus as a stats exporter
+	view.RegisterExporter(pe)
+
+	// Register stat views
+	err = view.Register(
+		// Gin (HTTP) stats
+		ochttp.ServerRequestCountView,
+		ochttp.ServerRequestBytesView,
+		ochttp.ServerResponseBytesView,
+		ochttp.ServerLatencyView,
+		ochttp.ServerRequestCountByMethod,
+		ochttp.ServerResponseCountByStatusCode,
+
+		// Gorm stats
+		ocgorm.QueryCountView,
+	)
+	if err != nil {
+		return err
+	}
 
 	// =========================================================================
 	// Start API Service

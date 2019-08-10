@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -16,13 +15,11 @@ type authHandler struct {
 
 
 func (h *authHandler) signIn(c *gin.Context) {
-	ctx := context.Background()
-
 	loginVM := new(service.LoginVM)
 	c.BindJSON(&loginVM)
 
 	token:= new(service.Token)
-	err := h.service.Auth(ctx, loginVM, token)
+	err := h.service.Auth(c.Request.Context(), loginVM, token)
 
 	if err != nil {
 		encodeError(err, h.logger, c)

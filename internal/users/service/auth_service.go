@@ -27,7 +27,7 @@ type authService struct {
 }
 
 // NewService creates and returns a new Auth service instance
-func NewAuthService(rep UserRepository, token TokenService, logger *logrus.Logger) AuthService {
+func NewAuthService(rep UserRepository, token TokenService, logger *logrus.Logger) *authService {
 	return &authService {
 		repo: rep,
 		tokenService: token,

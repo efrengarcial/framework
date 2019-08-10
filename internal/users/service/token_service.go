@@ -31,7 +31,7 @@ type tokenService struct {
 }
 
 // NewService creates and returns a new Token service instance
-func NewTokenService() TokenService {
+func NewTokenService() *tokenService {
 	return &tokenService {}
 }
 
