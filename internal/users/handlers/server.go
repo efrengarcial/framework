@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"go.opencensus.io/plugin/ochttp"
 	"net/http"
 	"os"
 	"strings"
+
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"go.opencensus.io/plugin/ochttp"
 
 	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/efrengarcial/framework/internal/users/repository"
@@ -40,7 +42,7 @@ func setAuthRouter(router *gin.Engine, as service.AuthService, logger *logrus.Lo
 }
 
 //New returns a new HTTP server.
-func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger) http.Handler  {
+func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter) http.Handler  {
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, logger)
@@ -51,6 +53,10 @@ func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger) http.Handl
 	router := app.Engine
 	setUserRouter(router, us, logger)
 	setAuthRouter(router, as, logger)
+
+	router.GET("/metrics", func(c *gin.Context) {
+		exporter.ServeHTTP(c.Writer, c.Request)
+	})
 
 	return app
 }

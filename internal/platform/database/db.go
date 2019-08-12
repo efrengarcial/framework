@@ -49,5 +49,7 @@ func Open(cfg Config) (*gorm.DB, error) {
 		RawQuery: q.Encode(),
 	}
 
-	return gorm.Open("postgres", u.String())
+	db , err:= gorm.Open("postgres", u.String())
+	db.LogMode(true)
+	return  db, err
 }

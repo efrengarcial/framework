@@ -2,9 +2,15 @@ package main
 
 import (
 	"context"
-	"contrib.go.opencensus.io/exporter/zipkin"
-	"contrib.go.opencensus.io/exporter/prometheus"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"contrib.go.opencensus.io/exporter/zipkin"
 	"github.com/efrengarcial/framework/internal/platform/conf"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/handlers"
@@ -12,18 +18,13 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
-	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/pkg/errors"
+	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
 	log "github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 // Create a new instance of the logger. You can have any number of instances.
@@ -135,15 +136,15 @@ func run()  error {
 		reporter.Close()
 	}()
 	// =========================================================================
-	// Create prometheus exporter
-	pe, err := prometheus.NewExporter(prometheus.Options{
+	//Start Metrics Support
+
+	exporter, err := prometheus.NewExporter(prometheus.Options{
 		Registry: prom.DefaultGatherer.(*prom.Registry),
 	})
+
 	if err != nil {
 		return err
 	}
-	// Register prometheus as a stats exporter
-	view.RegisterExporter(pe)
 
 	// Register stat views
 	err = view.Register(
@@ -162,6 +163,9 @@ func run()  error {
 		return err
 	}
 
+	// Register prometheus as a stats exporter
+	view.RegisterExporter(exporter)
+
 	// =========================================================================
 	// Start API Service
 
@@ -175,10 +179,11 @@ func run()  error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:       handlers.New(shutdown, db, logger),
+		Handler:       handlers.New(shutdown, db, logger, exporter),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}
+
 
 	// Make a channel to listen for errors coming from the listener. Use a
 	// buffered channel so the goroutine can exit if we don't collect this error.

@@ -1,15 +1,16 @@
 package web
 
 import (
+	"net/http"
+	"os"
+	"syscall"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/tracecontext"
 	"go.opencensus.io/trace"
-	"net/http"
-	"os"
-	"syscall"
 )
 
 // App is the entrypoint into our application and what configures our context
