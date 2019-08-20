@@ -8,8 +8,8 @@ import (
 //mockery -name=UserRepository
 type UserRepository interface {
 	repository.Repository
-	GetByEmail(email string) (*User, error)
-	GetByLogin(login string) (*User, error)
+	GetByEmail(ctx context.Context, email string) (*User, error)
+	GetByLogin(ctx context.Context, login string) (*User, error)
 	FindOneByLogin(ctx context.Context, login string) (*User, error)
 	FindOneByEmail(ctx context.Context, login string) (*User, error)
 }

@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"fmt"
+	"contrib.go.opencensus.io/exporter/prometheus"
+	"github.com/efrengarcial/framework/internal/mid"
+	"github.com/efrengarcial/framework/internal/platform/auth"
+	"go.opencensus.io/plugin/ochttp"
 	"net/http"
 	"os"
-	"strings"
-
-	"contrib.go.opencensus.io/exporter/prometheus"
-	"go.opencensus.io/plugin/ochttp"
 
 	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/efrengarcial/framework/internal/users/repository"
@@ -15,22 +14,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-func setUserRouter(router *gin.Engine, us service.UserService, logger *logrus.Logger) {
+func setUserRouter(api *gin.RouterGroup, us service.UserService, logger *logrus.Logger, authenticator *auth.Authenticator) {
 
-	v1 := router.Group("/api/v1")
+	api.Use(mid.Authenticate(authenticator))
 	{
+		api.Use(mid.HasRole(auth.RoleAdmin))
 		h := userHandler{us, logger}
-		v1.POST("/users" , func(c *gin.Context) {
+		api.POST("/users", func(c *gin.Context) {
 			ochttp.SetRoute(c.Request.Context(), "/users")
 		}, h.createUser)
-		v1.PUT("/users",func(c *gin.Context) {
+		api.PUT("/users", func(c *gin.Context) {
 			ochttp.SetRoute(c.Request.Context(), "/users")
 		}, h.updateUser)
-		v1.GET("/users",func(c *gin.Context) {
+		api.GET("/users", func(c *gin.Context) {
 			ochttp.SetRoute(c.Request.Context(), "/users")
 		}, h.findAll)
 	}
@@ -42,16 +41,17 @@ func setAuthRouter(router *gin.Engine, as service.AuthService, logger *logrus.Lo
 }
 
 //New returns a new HTTP server.
-func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter) http.Handler  {
+func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter, authenticator *auth.Authenticator) http.Handler  {
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, logger)
-	ts := service.NewTokenService()
-	as := service.NewAuthService(repo, ts, logger)
+	as := service.NewAuthService(repo, authenticator, logger)
 
 	app := web.NewApp(shutdown, logger)
 	router := app.Engine
-	setUserRouter(router, us, logger)
+	router.Use(mid.Error(logger))
+	v1 := router.Group("/api/v1")
+	setUserRouter(v1, us, logger, authenticator)
 	setAuthRouter(router, as, logger)
 
 	router.GET("/metrics", func(c *gin.Context) {
@@ -59,39 +59,4 @@ func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *
 	})
 
 	return app
-}
-
-type iErrBadRequest interface {
-	GetErrorKey() string
-}
-
-type stackTracer interface {
-	StackTrace() errors.StackTrace
-}
-
-func encodeError(err error,  logger *logrus.Logger,c *gin.Context) {
-	var status int
-
-	switch err.(type) {
-	case iErrBadRequest:
-		status = http.StatusBadRequest
-		iError, _ := err.(iErrBadRequest)
-		fmt.Println(iError.GetErrorKey())
-	default:
-		var errorLog strings.Builder
-		errorLog.WriteString(err.Error() + "\n\n")
-		if err, ok := err.(stackTracer); ok {
-			for _, f := range err.StackTrace() {
-				errorLog.WriteString(fmt.Sprintf("%+v \n\n", f))
-			}
-		}
-		logger.Error("error", errorLog.String())
-		fmt.Printf("with stack trace => %+v \n\n", err)
-		status = http.StatusInternalServerError
-	}
-
-	c.AbortWithStatusJSON(status, gin.H{
-		"message": err.Error(),
-		"status" : status,
-	} )
 }

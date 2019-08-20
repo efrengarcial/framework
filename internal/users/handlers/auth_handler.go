@@ -15,18 +15,28 @@ type authHandler struct {
 
 
 func (h *authHandler) signIn(c *gin.Context) {
-	loginVM := new(service.LoginVM)
-	c.BindJSON(&loginVM)
-
-	token:= new(service.Token)
-	err := h.service.Auth(c.Request.Context(), loginVM, token)
-
-	if err != nil {
-		encodeError(err, h.logger, c)
+	var loginVM service.LoginVM
+	//err :=  c.BindJSON(&loginVM)
+	if err := c.ShouldBindJSON(&loginVM); err != nil {
+		//c.AbortWithError(400, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, token)
+	token:= new(service.Token)
+	err := h.service.Auth(c.Request.Context(), &loginVM, token)
+	if err != nil {
+		switch err {
+		case service.ErrAuthenticationFailure:
+			c.JSON(http.StatusUnauthorized, token)
+			return
+		default:
+			c.Error(err)
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, token)
 
 }
 

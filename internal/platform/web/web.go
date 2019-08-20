@@ -26,6 +26,7 @@ type App struct {
 // NewApp creates an App value that handle a set of routes for the application.
 func NewApp(shutdown chan os.Signal, logger *logrus.Logger) *App {
 	//gin.SetMode(gin.ReleaseMode)
+	gin.ForceConsoleColor()
 	engine := gin.Default()
 	engine.Use(cors.Default())
 	app := App{

@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"expvar"
 	"fmt"
+	"github.com/efrengarcial/framework/internal/platform/auth"
 	"net/http"
 	"os"
 	"os/signal"
@@ -28,7 +30,10 @@ import (
 )
 
 // Create a new instance of the logger. You can have any number of instances.
-var logger = log.New()
+var (
+	logger = log.New()
+	build = "develop"
+)
 
 func main() {
 	// The API for setting attributes is a little different than the package level
@@ -52,8 +57,8 @@ func run()  error {
 		Web struct {
 			APIHost         string        `conf:"default:0.0.0.0:3000"`
 			DebugHost       string        `conf:"default:0.0.0.0:4000"`
-			ReadTimeout     time.Duration `conf:"default:5s"`
-			WriteTimeout    time.Duration `conf:"default:5s"`
+			ReadTimeout     time.Duration `conf:"default:60s"`
+			WriteTimeout    time.Duration `conf:"default:60s"`
 			ShutdownTimeout time.Duration `conf:"default:5s"`
 		}
 		DB struct {
@@ -62,6 +67,12 @@ func run()  error {
 			Host       string `conf:"default:0.0.0.0"`
 			Name       string `conf:"default:postgres"`
 			DisableTLS bool   `conf:"default:true"`
+		}
+		Auth struct {
+			KeyID          string `conf:"default:1"`
+			PrivateKeyFile string `conf:"default:/app/private.pem"`
+			SecretKey	   string `conf:"default:mySuperSecretKeyLol"`
+			Algorithm      string `conf:"default:HS512"`
 		}
 		Zipkin struct {
 			LocalEndpoint string  `conf:"default:0.0.0.0:3000"`
@@ -82,6 +93,29 @@ func run()  error {
 		}
 		return errors.Wrap(err, "parsing config")
 	}
+	// =========================================================================
+	// App Starting
+
+	// Print the build version for our logs. Also expose it under /debug/vars.
+	expvar.NewString("build").Set(build)
+	logger.Info("main : Started : Application Initializing version ", build)
+	defer log.Println("main : Completed")
+
+	out, err := conf.String(&cfg)
+	if err != nil {
+		return errors.Wrap(err, "generating config for output")
+	}
+	logger.Info("main : Config : ", out)
+
+	// =========================================================================
+	// Initialize authentication support
+
+	f := auth.NewSimpleKeyLookupFunc(cfg.Auth.KeyID,  []byte(cfg.Auth.SecretKey))
+	authenticator, err := auth.NewAuthenticator([]byte(cfg.Auth.SecretKey), cfg.Auth.KeyID, cfg.Auth.Algorithm, f)
+	if err != nil {
+		return errors.Wrap(err, "constructing authenticator")
+	}
+
 
 	// =========================================================================
 	// Start Database
@@ -137,7 +171,7 @@ func run()  error {
 	}()
 	// =========================================================================
 	//Start Metrics Support
-
+	//https://github.com/zsais/go-gin-prometheus
 	exporter, err := prometheus.NewExporter(prometheus.Options{
 		Registry: prom.DefaultGatherer.(*prom.Registry),
 	})
@@ -179,7 +213,7 @@ func run()  error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:       handlers.New(shutdown, db, logger, exporter),
+		Handler:      handlers.New(shutdown, db, logger, exporter, authenticator),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

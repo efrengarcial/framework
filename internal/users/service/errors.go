@@ -1,8 +1,18 @@
 package service
 
+import "errors"
+
 //https://medium.com/rungo/error-handling-in-go-f0125de052f0
 //https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
 //https://medium.com/@sebdah/go-best-practices-error-handling-2d15e1f0c5ee
+
+var (
+	// ErrAuthenticationFailure occurs when a user attempts to authenticate but
+	// anything goes wrong.
+	ErrAuthenticationFailure = errors.New("Authentication failed")
+	ErrLoginAlreadyUsed = NewErrBadRequest( "Nombre de inicio de sesión ya usado!", "userManagement" ,  "userexists")
+	ErrEmailAlreadyUsed = NewErrBadRequest( "Correo electrónico ya está en uso!", "userManagement" ,  "emailexists")
+)
 
 type IErrBadRequest interface {
 	error
@@ -18,18 +28,16 @@ type errBase struct {
 	Message string
 	ErrorKey string
 	EntityName string
+
+	Status      int         `json:"status"`
+	Code        string      `json:"code"`
+	Title       string      `json:"title"`
+	Details     string      `json:"details"`
+	Href        string      `json:"href"`
 }
 
 type ErrBadRequest struct {
 	errBase
-}
-
-type ErrLoginAlreadyUsed struct {
-	ErrBadRequest
-}
-
-type ErrEmailAlreadyUsed struct {
-	ErrBadRequest
 }
 
 func (e *ErrBadRequest) GetErrorKey() string {
@@ -46,20 +54,3 @@ func NewErrBadRequest(message,entityName string, errorKey string) *ErrBadRequest
 		},
 	}
 }
-func NewErrLoginAlreadyUsed() *ErrLoginAlreadyUsed {
-	return &ErrLoginAlreadyUsed{
-		ErrBadRequest{
-			errBase{Message: "Nombre de inicio de sesión ya usado!",EntityName: "userManagement" , ErrorKey: "userexists",
-			},
-		},
-	}
-}
-func NewErrEmailAlreadyUsed() *ErrEmailAlreadyUsed {
-	return &ErrEmailAlreadyUsed{
-		ErrBadRequest{
-			errBase{Message: "Correo electrónico ya está en uso!",EntityName: "userManagement" , ErrorKey: "emailexists",
-			},
-		},
-	}
-}
-

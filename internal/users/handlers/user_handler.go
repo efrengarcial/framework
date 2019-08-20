@@ -17,11 +17,16 @@ type userHandler struct {
 func (h *userHandler) createUser(c *gin.Context) {
 
 	var user *service.User
-	c.BindJSON(&user)
+	//c.BindJSON(&user)
+	if err := c.ShouldBindJSON(&user); err != nil {
+		//c.AbortWithError(400, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	user, err := h.service.Create(c.Request.Context(),user)
+	user, err := h.service.Create(c.Request.Context(), user)
 	if err != nil {
-		encodeError( err, h.logger, c)
+		c.Error(err)
 		return
 	}
 
@@ -42,7 +47,7 @@ func (h *userHandler) updateUser(c *gin.Context) {
 
 	user, err := h.service.Update(c.Request.Context(), user)
 	if err != nil {
-		encodeError( err, h.logger, c)
+		c.Error(err)
 		return
 	}
 
@@ -68,7 +73,7 @@ func (h *userHandler) findAll(c *gin.Context) {
 	//pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
 	_, err = h.service.FindAll(c.Request.Context(), pageable, &users, "")
 	if err != nil {
-		encodeError( err, h.logger, c)
+		c.Error(err)
 		return
 	}
 

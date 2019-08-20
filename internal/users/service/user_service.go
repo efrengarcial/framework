@@ -42,16 +42,16 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 	)
 
 	if user.ID > 0 {
-		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener una ID","userManagement","idexists")
+		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener un ID","userManagement","idexists")
 	}
 
 	if  existingUser  , err = service.repository.FindOneByLogin(ctx, strings.ToLower(user.Login)); existingUser != nil {
-		return nil, NewErrLoginAlreadyUsed()
+		return nil, ErrLoginAlreadyUsed
 	}
 	if err != nil { return nil, err }
 
 	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(user.Email));  existingUser != nil {
-		return nil, NewErrEmailAlreadyUsed()
+		return nil, ErrEmailAlreadyUsed
 	}
 	if err != nil { return nil, err}
 
@@ -60,8 +60,8 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 	}
 
 	// Generates a hashed version of our password
-	randomPassword, _ := platform.GeneratePassword()
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)
+	//randomPassword, _ := platform.GeneratePassword()
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil { return nil, err}
 
 	user.Password = string(hashedPass)
@@ -85,12 +85,12 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 	)
 
 	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(user.Email)); existingUser != nil && user.ID !=  existingUser.ID {
-		return nil, NewErrEmailAlreadyUsed()
+		return nil, ErrEmailAlreadyUsed
 	}
 	if err != nil { return nil, err }
 
 	if  existingUser  , err =  service.repository.FindOneByLogin(ctx, strings.ToLower(user.Login)); existingUser != nil && user.ID !=  existingUser.ID {
-		return nil, NewErrLoginAlreadyUsed()
+		return nil, ErrLoginAlreadyUsed
 	}
 	if err != nil { return nil, err }
 

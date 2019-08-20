@@ -2,6 +2,8 @@ package service
 
 import (
 	base "github.com/efrengarcial/framework/internal/platform/service"
+	. "github.com/markbates/pop/nulls"
+	"github.com/thoas/go-funk"
 	"time"
 )
 
@@ -9,13 +11,13 @@ import (
 // User represents a user in the system.
 type User struct {
 	base.Model
-	TenantId		uint64	  `json:"tenantId"`
-	Login	  		string    `json:"login" validate:"required" gorm:"not null"`
-	Password  		string    `json:"-" validate:"required" gorm:"not null"`
+	TenantId		Int64     `json:"tenantId"`
+	Login	  		string    `json:"login" binding:"required" gorm:"not null"`
+	Password  		string    `json:"password" binding:"required" gorm:"not null"`
 	FirstName 		string    `json:"firstName"`
 	LastName  		string    `json:"lastName"`
-	Email     		string    `json:"email" validate:"required" gorm:"not null"`
-	Activated 		bool	  `json:"activated" validate:"required" gorm:"not null"`
+	Email     		string    `json:"email" binding:"required" gorm:"not null"`
+	Activated 		bool	  `json:"activated" gorm:"not null"`
 	LangKey   		string    `json:"langKey"`
 	ImageUrl  		string    `json:"imageUrl"`
 	ActivationKey  	string    `json:"-"`
@@ -26,9 +28,9 @@ type User struct {
 
 type Authority struct {
 	base.Model
-	Name 		string 			`json:"name" validate:"required" gorm:"not null"`
-	TenantId	uint64	  		`json:"tenantId"`
-	Privileges  []Privilege `gorm:"many2many:fw_authority_privilege;association_autoupdate:false;association_autocreate:false"`
+	Name 		string 			`json:"name" binding:"required" gorm:"not null"`
+	TenantId	Int64	  		`json:"tenantId"`
+	Privileges  []Privilege 	`gorm:"many2many:fw_authority_privilege;association_autoupdate:false;association_autocreate:false"`
 }
 
 
@@ -38,8 +40,15 @@ type Privilege struct {
 
 // Token Entity
 type Token struct {
-	Token     string    `json:"token" validate:"required"`
+	Token     string    `json:"token"`
 	Valid     bool		`json:"valid"`
+}
+
+
+type LoginVM struct {
+	Login      string `json:"login"  binding:"required"`
+	Password   string `json:"password"  binding:"required"`
+	RememberMe bool   `json:"rememberMe"`
 }
 
 func (user *User) Validate() error {
@@ -50,11 +59,21 @@ func (authority *Authority) Validate() error {
 	return nil
 }
 
-func (user *User) GetTenantID() uint64 {
+func (user *User) GetTenantID() Int64 {
 	return user.TenantId
 }
 
-func (authority *Authority) GetTenantID() uint64 {
+func (user *User) GetRoles() []string {
+	if len(user.Authorities) > 0  {
+		r := funk.Map(user.Authorities, func(a Authority) string {
+			return a.Name
+		})
+		return r.([]string)
+	}
+	return nil
+}
+
+func (authority *Authority) GetTenantID() Int64 {
 	return authority.TenantId
 }
 

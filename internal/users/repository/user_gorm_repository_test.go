@@ -9,6 +9,7 @@ import (
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/go-test/deep"
 	"github.com/jinzhu/gorm"
+	. "github.com/markbates/pop/nulls"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"log"
@@ -58,7 +59,7 @@ func  Test_repository_Find(t *testing.T) {
 func Test_repository_Create(t *testing.T) {
 
 	var ( id  uint64  = 1
-		 tenantId  uint64  = 10
+		 tenantId = NewInt64(10)
 		 )
 	db, mock, err := sqlmock.New()
 	defer db.Close()
@@ -88,7 +89,7 @@ func Test_repository_Create(t *testing.T) {
 func Test_repository_Create_ExistingAuthority(t *testing.T) {
 
 	var ( id  uint64  = 1
-		tenantId  uint64  = 10
+		tenantId = NewInt64(10)
 		roleAdmin = "ROLE_ADMIN"
 	)
 	db, mock, err := sqlmock.New()
@@ -136,7 +137,7 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 func Test_repository_Save(t *testing.T) {
 
 	var ( id  uint64  = 1
-		tenantId  uint64  = 10
+		tenantId = NewInt64(10)
 	)
 	db, mock, err := sqlmock.New()
 	defer db.Close()

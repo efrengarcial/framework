@@ -21,19 +21,32 @@ func NewUserGormRepository(db *gorm.DB) *userGormRepository {
 	return &userGormRepository{repo}
 }
 
-func (repo *userGormRepository) GetByEmail(email string) (*service.User, error) {
+func (repo *userGormRepository) GetByEmail(ctx context.Context, email string) (*service.User, error) {
 	user := &service.User{}
-	if err := repo.DB().Where("email = ?", email).First(&user).Error; err != nil {
-		return nil, errors.WithStack(err)
+	orm := ocgorm.WithContext(ctx, repo.DB())
+	err := orm.Preload("Authorities").Where("email = ?", email).First(&user).Error
+	if err !=nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, service.ErrAuthenticationFailure
+		} else {
+			return nil, errors.WithStack(err)
+		}
 	}
 	return user, nil
 }
 
-func (repo *userGormRepository) GetByLogin(login string) (*service.User, error) {
+func (repo *userGormRepository) GetByLogin(ctx context.Context, login string) (*service.User, error) {
 	user := &service.User{}
-	if err := repo.DB().Where("login = ?", login).First(&user).Error; err != nil {
-		return nil, errors.WithStack(err)
+	orm := ocgorm.WithContext(ctx, repo.DB())
+	err := orm.Preload("Authorities").Where("login = ?", login).First(&user).Error
+	if err !=nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, service.ErrAuthenticationFailure
+		} else {
+			return nil, errors.WithStack(err)
+		}
 	}
+
 	return user, nil
 }
 

@@ -2,41 +2,36 @@ package service
 
 import (
 	"context"
+	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
-
-type LoginVM struct {
-	UserName    string `json:"username"`
-	Password 	string `json:"password"`
-	RememberMe 	bool `json:"rememberMe"`
-}
 
 
 // AuthService has the logic authentication
 type AuthService interface {
 	Auth(ctx context.Context, req *LoginVM, res *Token) error
-	ValidateToken(ctx context.Context, req *Token, res *Token) error
 }
 
 type authService struct {
 	repo         UserRepository
-	tokenService TokenService
+	authenticator *auth.Authenticator
 	logger       *logrus.Logger
 }
 
 // NewService creates and returns a new Auth service instance
-func NewAuthService(rep UserRepository, token TokenService, logger *logrus.Logger) *authService {
+func NewAuthService(rep UserRepository, authenticator *auth.Authenticator, logger *logrus.Logger) *authService {
 	return &authService {
 		repo: rep,
-		tokenService: token,
+		authenticator: authenticator,
 		logger:     logger,
 	}
 }
 
-func (service *authService) Auth(ctx context.Context, req *LoginVM, res *Token) error {
-	user, err := service.repo.GetByLogin(req.UserName)
+func (service *authService) Auth(ctx context.Context, req *LoginVM, tkn *Token) error {
+	user, err := service.repo.GetByLogin(ctx , req.Login)
 	if err != nil {
 		return err
 	}
@@ -44,31 +39,16 @@ func (service *authService) Auth(ctx context.Context, req *LoginVM, res *Token) 
 	// Compares our given password against the hashed password
 	// stored in the database
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return err
+		return ErrAuthenticationFailure
 	}
+	// If we are this far the request is valid. Create some claims for the user
+	// and generate their token.
+	claims := auth.NewClaims(user.Login, user.GetRoles(), time.Now(), time.Hour)
 
-	token, err := service.tokenService.Encode(user)
+	tkn.Token, err = service.authenticator.GenerateToken(claims)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "generating token")
 	}
-	res.Token = token
-	return nil
-}
-
-func (service *authService) ValidateToken(ctx context.Context, req *Token, res *Token) error {
-
-	// Decode token
-	claims, err := service.tokenService.Decode(req.Token)
-
-	if err != nil {
-		return err
-	}
-
-	if claims.User.ID == 0 {
-		return errors.New("invalid user")
-	}
-
-	res.Valid = true
-
+	tkn.Valid = true
 	return nil
 }
