@@ -1,10 +1,11 @@
 package service
 
 import (
-	base "github.com/efrengarcial/framework/internal/platform/service"
+	"time"
+
+	base "github.com/efrengarcial/framework/internal/platform/model"
 	. "github.com/markbates/pop/nulls"
 	"github.com/thoas/go-funk"
-	"time"
 )
 
 

@@ -1,12 +1,13 @@
-package handlers
+package delivery
 
 import (
-	base "github.com/efrengarcial/framework/internal/platform/service"
+	"net/http"
+	"strconv"
+
+	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
 )
 
 type userHandler struct {

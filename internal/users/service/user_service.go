@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
-	"github.com/efrengarcial/framework/internal/platform"
-	base "github.com/efrengarcial/framework/internal/platform/service"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
+
+	"github.com/efrengarcial/framework/internal/platform"
+	base "github.com/efrengarcial/framework/internal/platform/model"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
 

@@ -1,8 +1,14 @@
-package handlers
+package delivery
 
 import (
 	"bytes"
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strconv"
+	"testing"
+
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/repository"
 	"github.com/efrengarcial/framework/internal/users/service"
@@ -10,11 +16,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"strconv"
-	"testing"
 )
 
 func setup() *gorm.DB {

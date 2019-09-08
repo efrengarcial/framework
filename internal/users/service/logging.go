@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
-	base "github.com/efrengarcial/framework/internal/platform/service"
+	"time"
+
+	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"time"
 )
 
 type loggingService struct {

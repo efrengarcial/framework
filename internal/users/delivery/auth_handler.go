@@ -1,10 +1,11 @@
-package handlers
+package delivery
 
 import (
+	"net/http"
+
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 

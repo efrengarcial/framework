@@ -15,7 +15,7 @@ import (
 	"contrib.go.opencensus.io/exporter/zipkin"
 	"github.com/efrengarcial/framework/internal/platform/conf"
 	"github.com/efrengarcial/framework/internal/platform/database"
-	"github.com/efrengarcial/framework/internal/users/handlers"
+	"github.com/efrengarcial/framework/internal/users/delivery"
 	"github.com/efrengarcial/framework/internal/users/service"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	openzipkin "github.com/openzipkin/zipkin-go"
@@ -213,7 +213,7 @@ func run()  error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.New(shutdown, db, logger, exporter, authenticator),
+		Handler:      delivery.New(shutdown, db, logger, exporter, authenticator),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

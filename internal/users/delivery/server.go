@@ -1,12 +1,13 @@
-package handlers
+package delivery
 
 import (
+	"net/http"
+	"os"
+
 	"contrib.go.opencensus.io/exporter/prometheus"
 	"github.com/efrengarcial/framework/internal/mid"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"go.opencensus.io/plugin/ochttp"
-	"net/http"
-	"os"
 
 	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/efrengarcial/framework/internal/users/repository"

@@ -3,19 +3,20 @@ package repository
 import (
 	"context"
 	"database/sql/driver"
+	"log"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
+	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/efrengarcial/framework/internal/platform/repository"
-	base "github.com/efrengarcial/framework/internal/platform/service"
 	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/go-test/deep"
 	"github.com/jinzhu/gorm"
 	. "github.com/markbates/pop/nulls"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"log"
-	"regexp"
-	"testing"
-	"time"
 )
 
 type AnyTime struct{}

@@ -1,14 +1,14 @@
 package database
 
 import (
-	"github.com/efrengarcial/framework/internal/platform/service"
+	"github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/pkg/errors"
 	"math"
 
 	"github.com/jinzhu/gorm"
 )
 
-func Pagging(p *Param, data interface{}) (*service.Pagination, error) {
+func Pagging(p *Param, data interface{}) (*model.Pagination, error) {
 	db := p.DB
 
 	if p.ShowSQL {
@@ -27,7 +27,7 @@ func Pagging(p *Param, data interface{}) (*service.Pagination, error) {
 	}
 
 	done := make(chan bool, 1)
-	var pagination service.Pagination
+	var pagination model.Pagination
 	var count int
 	var offset int
 

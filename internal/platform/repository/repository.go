@@ -3,29 +3,29 @@ package repository
 import (
 	"context"
 
-	"github.com/efrengarcial/framework/internal/platform/service"
+	base "github.com/efrengarcial/framework/internal/platform/model"
 )
 
 // mockery -name=Repository
 type Repository interface {
 
 	// Insert puts a new instance of the give Model in the database
-	Insert(ctx context.Context, model service.IModel) (service.IModel, error)
+	Insert(ctx context.Context, model base.IModel) (base.IModel, error)
 
-	Update(model service.IModel) error
+	Update(model base.IModel) error
 
-	Save(model service.IModel) (uint64, error)
+	Save(model base.IModel) (uint64, error)
 
-	Find(receiver service.IModel, id uint64) error
+	Find(receiver base.IModel, id uint64) error
 
-	FindFirst(receiver service.IModel, where string, args ...interface{}) error
+	FindFirst(receiver base.IModel, where string, args ...interface{}) error
 
 	FindAll(result interface{}, where string, args ...interface{}) (err error)
 
-	FindAllPageable(ctx context.Context, pageable *service.Pageable, result interface{},  where string, args ...interface{}) (*service.Pagination, error)
+	FindAllPageable(ctx context.Context, pageable *base.Pageable, result interface{},  where string, args ...interface{}) (*base.Pagination, error)
 
-	Delete(model service.IModel) error
+	Delete(model base.IModel) error
 
 	// NewRecord check if the model exist in the store
-	NewRecord(model service.IModel) bool
+	NewRecord(model base.IModel) bool
 }

@@ -4,7 +4,7 @@ package mocks
 
 import (
 	"github.com/efrengarcial/framework/internal/platform/database"
-	service "github.com/efrengarcial/framework/internal/platform/service"
+	service "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/stretchr/testify/mock"
 )
 

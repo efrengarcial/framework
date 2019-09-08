@@ -2,14 +2,15 @@ package service
 
 import (
 	"context"
-	base "github.com/efrengarcial/framework/internal/platform/service"
+	"os"
+	"testing"
+
+	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/efrengarcial/framework/internal/users/mocks"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"os"
-	"testing"
 )
 
 var logger log.Logger
