@@ -1,4 +1,4 @@
-package service
+package users
 
 import "errors"
 
@@ -48,7 +48,7 @@ func (e *ErrBadRequest) Error() string {
 	return e.Message
 }
 
-func NewErrBadRequest(message,entityName string, errorKey string) *ErrBadRequest {
+func NewErrBadRequest(message, entityName, errorKey string) *ErrBadRequest {
 	return &ErrBadRequest{
 		errBase{Message:message, EntityName:entityName, ErrorKey: errorKey,
 		},

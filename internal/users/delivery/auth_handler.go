@@ -3,20 +3,20 @@ package delivery
 import (
 	"net/http"
 
-	"github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/users"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 
 type authHandler struct {
-	service service.AuthService
+	service users.AuthService
 	logger  *logrus.Logger
 }
 
 
 func (h *authHandler) signIn(c *gin.Context) {
-	var loginVM service.LoginVM
+	var loginVM users.LoginVM
 	//err :=  c.BindJSON(&loginVM)
 	if err := c.ShouldBindJSON(&loginVM); err != nil {
 		//c.AbortWithError(400, err)
@@ -24,11 +24,11 @@ func (h *authHandler) signIn(c *gin.Context) {
 		return
 	}
 
-	token:= new(service.Token)
+	token:= new(users.Token)
 	err := h.service.Auth(c.Request.Context(), &loginVM, token)
 	if err != nil {
 		switch err {
-		case service.ErrAuthenticationFailure:
+		case users.ErrAuthenticationFailure:
 			c.JSON(http.StatusUnauthorized, token)
 			return
 		default:

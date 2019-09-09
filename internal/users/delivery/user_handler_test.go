@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/efrengarcial/framework/internal/platform/database"
+	"github.com/efrengarcial/framework/internal/users"
 	"github.com/efrengarcial/framework/internal/users/repository"
-	"github.com/efrengarcial/framework/internal/users/service"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
@@ -21,7 +21,7 @@ import (
 func setup() *gorm.DB {
 	// Initialize an in-memory database for full integration testing.
 	db := database.Initialize("sqlite3", ":memory:")
-	db.AutoMigrate(&service.User{}, &service.Authority{}, &service.Privilege{})
+	db.AutoMigrate(&users.User{}, &users.Authority{}, &users.Privilege{})
 
 	return  db
 }
@@ -72,13 +72,13 @@ func TestUpdateHandler(t *testing.T) {
 	repo := repository.NewUserGormRepository(db)
 	shutdown := make(chan os.Signal, 1)
 	server := New(shutdown, db, logger)
-	user := &service.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
+	user := &users.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
 	saveUser, err := repo.Insert(context.Background(), user)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	var  users []service.User
+	var  users []users.User
 	repo.FindAll(&users, "")
 
 	var jsonStr = []byte(`{"id" : "` +  strconv.FormatUint(saveUser.GetID(), 10) + `","login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)

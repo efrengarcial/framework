@@ -11,7 +11,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/efrengarcial/framework/internal/platform/repository"
-	"github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/users"
 	"github.com/go-test/deep"
 	"github.com/jinzhu/gorm"
 	. "github.com/markbates/pop/nulls"
@@ -38,7 +38,7 @@ func  Test_repository_Find(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-	user := new(service.User)
+	user := new(users.User)
 
 	var (
 		id  uint64  = 1
@@ -54,7 +54,7 @@ func  Test_repository_Find(t *testing.T) {
 	err = repository.Find(user, id)
 
 	assert.NoError(t, err)
-	assert.Nil(t, deep.Equal(&service.User{ Model : base.Model{ ID: id}, Login: login}, user))
+	assert.Nil(t, deep.Equal(&users.User{ Model : base.Model{ ID: id}, Login: login}, user))
 }
 
 func Test_repository_Create(t *testing.T) {
@@ -70,7 +70,7 @@ func Test_repository_Create(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+	user := &users.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
@@ -102,7 +102,7 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
 
-	authority := service.Authority{Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
+	authority := users.Authority{Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
 
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "fw_authority"  `)).
 		WithArgs(AnyTime{}, AnyTime{}, authority.CreatedBy, authority.LastModifiedBy, roleAdmin, tenantId).WillReturnRows(
@@ -110,11 +110,11 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 
 	repository.Insert(context.Background(), &authority)
 
-	existAuthority :=  service.Authority{Model : base.Model{ID: id}}
+	existAuthority :=  users.Authority{Model : base.Model{ID: id}}
 
-	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+	user := &users.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk" ,
-		Authorities: []service.Authority{existAuthority }}
+		Authorities: []users.Authority{existAuthority }}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
 		`INSERT INTO "fw_user" `)).
@@ -148,7 +148,7 @@ func Test_repository_Save(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-	user := &service.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
+	user := &users.User{ Model : base.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	sql := regexp.QuoteMeta(
@@ -181,7 +181,7 @@ func  Test_repository_FindAll(t *testing.T) {
 	var (
 		id  uint64  = 1
 		login = "user"
-		users []service.User
+		users []users.User
 	)
 
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -209,7 +209,7 @@ func  Test_repository_FindAllPageable(t *testing.T) {
 	var (
 		id  uint64  = 1
 		login = "user"
-		users []service.User
+		users []users.User
 	)
 
 	mock.ExpectQuery(regexp.QuoteMeta(

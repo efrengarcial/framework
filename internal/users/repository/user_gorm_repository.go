@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/efrengarcial/framework/internal/platform/repository"
-	"github.com/efrengarcial/framework/internal/users/service"
+	"github.com/efrengarcial/framework/internal/users"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
@@ -22,13 +22,13 @@ func NewUserGormRepository(db *gorm.DB) *userGormRepository {
 	return &userGormRepository{repo}
 }
 
-func (repo *userGormRepository) GetByEmail(ctx context.Context, email string) (*service.User, error) {
-	user := &service.User{}
+func (repo *userGormRepository) GetByEmail(ctx context.Context, email string) (*users.User, error) {
+	user := &users.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	err := orm.Preload("Authorities").Where("email = ?", email).First(&user).Error
 	if err !=nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, service.ErrAuthenticationFailure
+			return nil, users.ErrAuthenticationFailure
 		} else {
 			return nil, errors.WithStack(err)
 		}
@@ -36,13 +36,13 @@ func (repo *userGormRepository) GetByEmail(ctx context.Context, email string) (*
 	return user, nil
 }
 
-func (repo *userGormRepository) GetByLogin(ctx context.Context, login string) (*service.User, error) {
-	user := &service.User{}
+func (repo *userGormRepository) GetByLogin(ctx context.Context, login string) (*users.User, error) {
+	user := &users.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	err := orm.Preload("Authorities").Where("login = ?", login).First(&user).Error
 	if err !=nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, service.ErrAuthenticationFailure
+			return nil, users.ErrAuthenticationFailure
 		} else {
 			return nil, errors.WithStack(err)
 		}
@@ -51,8 +51,8 @@ func (repo *userGormRepository) GetByLogin(ctx context.Context, login string) (*
 	return user, nil
 }
 
-func (repo *userGormRepository) FindOneByLogin(ctx context.Context, login string) (*service.User, error) {
-	user := &service.User{}
+func (repo *userGormRepository) FindOneByLogin(ctx context.Context, login string) (*users.User, error) {
+	user := &users.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	var err error
 	err = orm.Where("login = ?", login).First(&user).Error
@@ -68,8 +68,8 @@ func (repo *userGormRepository) FindOneByLogin(ctx context.Context, login string
 	return user, nil
 }
 
-func (repo *userGormRepository) FindOneByEmail(ctx context.Context, login string) (*service.User, error) {
-	user := &service.User{}
+func (repo *userGormRepository) FindOneByEmail(ctx context.Context, login string) (*users.User, error) {
+	user := &users.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	var err error
 	err = orm.Where("email = ?", login).First(&user).Error

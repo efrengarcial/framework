@@ -4,7 +4,10 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+
 	"github.com/efrengarcial/framework/internal/platform/auth"
+	"github.com/efrengarcial/framework/internal/users"
+
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,7 +19,6 @@ import (
 	"github.com/efrengarcial/framework/internal/platform/conf"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/delivery"
-	"github.com/efrengarcial/framework/internal/users/service"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
@@ -144,7 +146,7 @@ func run()  error {
 	// into database columns/types etc. This will
 	// check for changes and migrate them each time
 	// this service is restarted.
-	db.AutoMigrate(&service.User{}, &service.Authority{}, &service.Privilege{})
+	db.AutoMigrate(&users.User{}, &users.Authority{}, &users.Privilege{})
 
 	// =========================================================================
 	// Start Tracing Support

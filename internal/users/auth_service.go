@@ -1,4 +1,4 @@
-package service
+package users
 
 import (
 	"context"
@@ -17,9 +17,9 @@ type AuthService interface {
 }
 
 type authService struct {
-	repo         UserRepository
+	repo          UserRepository
 	authenticator *auth.Authenticator
-	logger       *logrus.Logger
+	logger        *logrus.Logger
 }
 
 // NewService creates and returns a new Auth service instance
