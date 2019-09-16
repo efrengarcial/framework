@@ -17,7 +17,7 @@ type userHandler struct {
 
 func (h *userHandler) createUser(c *gin.Context) {
 
-	var user *service.User
+	var user *users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.Error(err)
 		return
@@ -41,7 +41,7 @@ func (h *userHandler) createUser(c *gin.Context) {
 
 func (h *userHandler) updateUser(c *gin.Context) {
 
-	var user *service.User
+	var user *users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.Error(err)
 		return
