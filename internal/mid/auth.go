@@ -46,8 +46,10 @@ func HasRole(roles ...string) gin.HandlerFunc {
 		}
 
 		if !claims.HasRole(roles...) {
-			err :=  errors.New("you are not authorized for that action")
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			//you are not authorized for that action
+			c.AbortWithStatusJSON(http.StatusForbidden,
+				gin.H{"error": "error.http.403", "title" : "Forbidden",  "detail" : "Access is denied" ,
+					"path" : c.Request.URL.Path, "status" : http.StatusForbidden})
 			return
 		}
 	}
