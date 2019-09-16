@@ -28,7 +28,7 @@ type errBase struct {
 	Message string
 	ErrorKey string
 	EntityName string
-
+	//https://github.com/gin-gonic/gin/issues/274
 	Status      int         `json:"status"`
 	Code        string      `json:"code"`
 	Title       string      `json:"title"`

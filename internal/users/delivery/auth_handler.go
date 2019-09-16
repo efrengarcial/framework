@@ -17,10 +17,8 @@ type authHandler struct {
 
 func (h *authHandler) signIn(c *gin.Context) {
 	var loginVM users.LoginVM
-	//err :=  c.BindJSON(&loginVM)
 	if err := c.ShouldBindJSON(&loginVM); err != nil {
-		//c.AbortWithError(400, err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Error(err)
 		return
 	}
 
@@ -38,7 +36,6 @@ func (h *authHandler) signIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, token)
-
 }
 
 

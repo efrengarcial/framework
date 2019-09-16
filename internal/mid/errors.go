@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/go-playground/validator.v8"
 	"net/http"
 	"strings"
 )
@@ -36,6 +37,9 @@ func jsonAppErrorReporterT(errType gin.ErrorType, logger *logrus.Logger) gin.Han
 				status = http.StatusBadRequest
 				iError, _ := err.(iErrBadRequest)
 				fmt.Println(iError.GetErrorKey())
+			case validator.ValidationErrors:
+				status = http.StatusBadRequest
+				fmt.Println(err.Error())
 			default:
 				var errorLog strings.Builder
 				errorLog.WriteString(err.Error() + "\n\n")
