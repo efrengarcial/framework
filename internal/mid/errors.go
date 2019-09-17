@@ -11,7 +11,13 @@ import (
 )
 
 type iErrBadRequest interface {
-	GetErrorKey() string
+	GetTitle() string
+	GetEntityName() string
+}
+
+type iErrCustomParameterized interface {
+	GetTitle() string
+	GetParams() map[string]string
 }
 
 type stackTracer interface {
@@ -29,17 +35,48 @@ func jsonAppErrorReporterT(errType gin.ErrorType, logger *logrus.Logger) gin.Han
 		detectedErrors := c.Errors.ByType(errType)
 
 		if len(detectedErrors) > 0 {
+
 			err := detectedErrors[0].Err
-			var status int
+			var (
+				status     int
+				title      string
+				entityName string
+				params     map[string]string
+			)
 
 			switch err.(type) {
 			case iErrBadRequest:
 				status = http.StatusBadRequest
 				iError, _ := err.(iErrBadRequest)
-				fmt.Println(iError.GetErrorKey())
+				title = iError.GetTitle()
+				entityName = iError.GetEntityName()
+				c.Header("X-app-alert", err.Error())
+				c.Header("x-app-params", entityName)
+				c.AbortWithStatusJSON(status, gin.H{
+					"message": err.Error(),
+					"status" : status,
+					"title" :  title,
+					"params" : entityName,
+					"entityName" : entityName,
+					"errorKey" :  err.Error(),
+				})
+			case iErrCustomParameterized:
+				status = http.StatusBadRequest
+				iError, _ := err.(iErrCustomParameterized)
+				title = iError.GetTitle()
+				params = iError.GetParams()
+				c.AbortWithStatusJSON(status, gin.H{
+					"message": err.Error(),
+					"status" : status,
+					"title" : title,
+					"params" : params,
+				})
 			case validator.ValidationErrors:
 				status = http.StatusBadRequest
-				fmt.Println(err.Error())
+				c.AbortWithStatusJSON(status, gin.H{
+					"message": err.Error(),
+					"status" : status,
+				})
 			default:
 				var errorLog strings.Builder
 				errorLog.WriteString(err.Error() + "\n\n")
@@ -51,19 +88,14 @@ func jsonAppErrorReporterT(errType gin.ErrorType, logger *logrus.Logger) gin.Han
 				logger.Error("error", errorLog.String())
 				fmt.Printf("with stack trace => %+v \n\n", err)
 				status = http.StatusInternalServerError
+				c.AbortWithStatusJSON(status, gin.H{
+					"message": "error.internalServerError",
+					"status" : status,
+					"title" : "Error Interno del Servidor",
+				})
 			}
-
-			// Put the error into response
-			//c.IndentedJSON(parsedError.Code, parsedError)
-			//c.Abort()
-			// or c.AbortWithStatusJSON(parsedError.Code, parsedError)
-			c.AbortWithStatusJSON(status, gin.H{
-				"message": err.Error(),
-				"status" : status,
-			})
 
 			return
 		}
-
 	}
 }

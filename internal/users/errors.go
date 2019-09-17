@@ -9,48 +9,72 @@ import "errors"
 var (
 	// ErrAuthenticationFailure occurs when a user attempts to authenticate but
 	// anything goes wrong.
-	ErrAuthenticationFailure = errors.New("Authentication failed")
-	ErrLoginAlreadyUsed = NewErrBadRequest( "Nombre de inicio de sesión ya usado!", "userManagement" ,  "userexists")
-	ErrEmailAlreadyUsed = NewErrBadRequest( "Correo electrónico ya está en uso!", "userManagement" ,  "emailexists")
+	ErrAuthenticationFailure = errors.New("authentication failed")
+	ErrLoginAlreadyUsed      = NewErrBadRequest( "Nombre de usuario ya utilizado!", "error.userexists", "userManagement")
+	ErrEmailAlreadyUsed      = NewErrBadRequest( "Email ya utilizado!", "error.emailexists", "userManagement")
+	ErrIdExist               = 	NewErrBadRequest("Un nuevo Usuario ya no puede tener un ID","error.idexists", "userManagement")
 )
 
 type IErrBadRequest interface {
 	error
-	GetErrorKey() string
+	GetTitle() string
+	GetEntityName() string
 }
 
-type IErrInternalServerError interface {
+type IErrCustomParameterized interface {
 	error
-	GetErrorKey() string
+	GetTitle() string
+	GetParams() map[string]string
 }
 
 type errBase struct {
-	Message string
-	ErrorKey string
-	EntityName string
 	//https://github.com/gin-gonic/gin/issues/274
-	Status      int         `json:"status"`
-	Code        string      `json:"code"`
-	Title       string      `json:"title"`
-	Details     string      `json:"details"`
-	Href        string      `json:"href"`
+	Title       string
+	Details     string
+	Status      int
+	Code        string
+	Href        string
 }
 
 type ErrBadRequest struct {
 	errBase
+	EntityName		string
 }
 
-func (e *ErrBadRequest) GetErrorKey() string {
-	return e.EntityName +"."+ e.ErrorKey
+type ErrCustomParameterized struct {
+	errBase
+	Params		map[string]string
+}
+
+func (e *ErrBadRequest) GetTitle() string {
+	return e.Title
+}
+
+func (e *ErrBadRequest) GetEntityName() string {
+	return e.EntityName
 }
 
 func (e *ErrBadRequest) Error() string {
-	return e.Message
+	return e.Code
 }
 
-func NewErrBadRequest(message, entityName, errorKey string) *ErrBadRequest {
+
+func (e *ErrCustomParameterized) GetTitle() string {
+	return e.Title
+}
+
+func (e *ErrCustomParameterized) GetParams() map[string]string {
+	return e.Params
+}
+
+func (e *ErrCustomParameterized) Error() string {
+	return e.Code
+}
+
+func NewErrBadRequest(title, code, entityName string) *ErrBadRequest {
 	return &ErrBadRequest{
-		errBase{Message:message, EntityName:entityName, ErrorKey: errorKey,
-		},
+		errBase{Title:title, Code: code},
+		entityName,
 	}
 }
+

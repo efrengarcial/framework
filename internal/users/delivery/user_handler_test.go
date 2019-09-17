@@ -41,7 +41,7 @@ func TestCreateHandler(t *testing.T) {
 	shutdown := make(chan os.Signal, 1)
 	server := New(shutdown, db, logger)
 
-	//user := &model.User{Login:"efren.gl" , Email:"efren.gl@gmail.com" }
+	//user := &model.User{UserName:"efren.gl" , Email:"efren.gl@gmail.com" }
 	//repo.Save(user)
 
 	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)

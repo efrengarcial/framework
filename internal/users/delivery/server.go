@@ -1,14 +1,13 @@
 package delivery
 
 import (
-	"net/http"
-	"os"
-
 	"contrib.go.opencensus.io/exporter/prometheus"
 	"github.com/efrengarcial/framework/internal/mid"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/efrengarcial/framework/internal/users"
 	"go.opencensus.io/plugin/ochttp"
+	"net/http"
+	"os"
 
 	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/efrengarcial/framework/internal/users/repository"
@@ -38,7 +37,7 @@ func setUserRouter(api *gin.RouterGroup, us users.UserService, logger *logrus.Lo
 
 func setAuthRouter(router *gin.Engine, as users.AuthService, logger *logrus.Logger) {
 	a := authHandler{as, logger}
-	router.POST("/authenticate", a.signIn)
+	router.POST("/api/authenticate", a.signIn)
 }
 
 //New returns a new HTTP server.

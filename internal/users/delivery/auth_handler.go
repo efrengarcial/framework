@@ -27,7 +27,9 @@ func (h *authHandler) signIn(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case users.ErrAuthenticationFailure:
-			c.JSON(http.StatusUnauthorized, token)
+			c.AbortWithStatusJSON(http.StatusUnauthorized,
+				gin.H{"error": "error.http.401", "title" : "Unauthorized",  "detail" : "Bad credentials" ,
+					"path" : c.Request.URL.Path, "status" : http.StatusUnauthorized})
 			return
 		default:
 			c.Error(err)

@@ -57,7 +57,7 @@ func run()  error {
 	// Configuration
 	var cfg struct {
 		Web struct {
-			APIHost         string        `conf:"default:0.0.0.0:3000"`
+			APIHost         string        `conf:"default:0.0.0.0:8080"`
 			DebugHost       string        `conf:"default:0.0.0.0:4000"`
 			ReadTimeout     time.Duration `conf:"default:60s"`
 			WriteTimeout    time.Duration `conf:"default:60s"`
@@ -140,6 +140,7 @@ func run()  error {
 	}()
 
 	// Register instrumentation callbacks
+	//https://github.com/sagikazarmark/go-gin-gorm-opencensus
 	ocgorm.RegisterCallbacks(db)
 
 	// Automatically migrates the user struct

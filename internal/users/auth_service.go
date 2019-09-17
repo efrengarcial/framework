@@ -32,7 +32,7 @@ func NewAuthService(rep UserRepository, authenticator *auth.Authenticator, logge
 }
 
 func (service *authService) Auth(ctx context.Context, req *LoginVM, tkn *Token) error {
-	user, err := service.repo.GetByLogin(ctx , req.Login)
+	user, err := service.repo.GetByLogin(ctx , req.UserName)
 	if err != nil {
 		return err
 	}

@@ -43,7 +43,7 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 	)
 
 	if user.ID > 0 {
-		return nil, NewErrBadRequest("Un nuevo usuario ya no puede tener un ID","userManagement","idexists")
+		return nil, ErrIdExist
 	}
 
 	if  existingUser  , err = service.repository.FindOneByLogin(ctx, strings.ToLower(user.Login)); existingUser != nil {

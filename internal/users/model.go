@@ -47,7 +47,7 @@ type Token struct {
 
 
 type LoginVM struct {
-	Login      string `json:"login"  binding:"required"`
+	UserName   string `json:"username"  binding:"required"`
 	Password   string `json:"password"  binding:"required"`
 	RememberMe bool   `json:"rememberMe"`
 }

@@ -35,6 +35,8 @@ func (h *userHandler) createUser(c *gin.Context) {
 		ID: user.GetID(),
 	}
 
+	c.Header("X-usersApp-alert", "usersApp.userManagement.created")
+	c.Header("x-usersApp-params", strconv.FormatUint(user.GetID(), 10))
 	c.JSON(http.StatusCreated, response)
 }
 
