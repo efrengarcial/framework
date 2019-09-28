@@ -66,6 +66,7 @@ func (h *userHandler) updateUser(c *gin.Context) {
 
 
 func (h *userHandler) findAll(c *gin.Context) {
+	//span := trace.FromContext(c.Request.Context())
 	pageable :=  new(base.Pageable)
 	page, err := strconv.Atoi(c.Query("page"))
 	limit, err := strconv.Atoi(c.Query("limit"))
