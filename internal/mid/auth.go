@@ -2,6 +2,7 @@ package mid
 
 import (
 	"context"
+	"fmt"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -29,6 +30,7 @@ func Authenticate(authenticator *auth.Authenticator) gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println(claims.Subject)
 		// Add claims to the context so they can be retrieved later.
 		ctx := context.WithValue(c.Request.Context(), auth.Key, claims)
 		c.Request = c.Request.WithContext(ctx)

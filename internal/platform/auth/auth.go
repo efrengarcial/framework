@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"github.com/efrengarcial/framework/internal/platform/cache"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
@@ -39,6 +40,7 @@ type Authenticator struct {
 	privateKey       []byte
 	activeKID        string
 	algorithm        string
+	cacheService     *cache.Cache
 	pubKeyLookupFunc KeyLookupFunc
 	parser           *jwt.Parser
 }
@@ -48,7 +50,7 @@ type Authenticator struct {
 // - The public key func is nil.
 // - The key ID is blank.
 // - The specified algorithm is unsupported.
-func NewAuthenticator(privateKey []byte, activeKID, algorithm string, publicKeyLookupFunc KeyLookupFunc) (*Authenticator, error) {
+func NewAuthenticator(privateKey []byte, activeKID, algorithm string, publicKeyLookupFunc KeyLookupFunc, cache cache.Cache) (*Authenticator, error) {
 	if  privateKey == nil {
 		return nil, errors.New("private key cannot be nil")
 	}
@@ -72,6 +74,7 @@ func NewAuthenticator(privateKey []byte, activeKID, algorithm string, publicKeyL
 		algorithm:        algorithm,
 		pubKeyLookupFunc: publicKeyLookupFunc,
 		parser:           &parser,
+		cacheService: 	  &cache,
 	}
 
 	return &a, nil

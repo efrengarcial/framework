@@ -4,6 +4,7 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/efrengarcial/framework/internal/platform/cache"
 
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/efrengarcial/framework/internal/users"
@@ -111,9 +112,13 @@ func run()  error {
 
 	// =========================================================================
 	// Initialize authentication support
+	cache := cache.NewRedisCache(cache.RedisOpts{
+		Host:       "",
+		Expiration: time.Hour,
+	})
 
 	f := auth.NewSimpleKeyLookupFunc(cfg.Auth.KeyID,  []byte(cfg.Auth.SecretKey))
-	authenticator, err := auth.NewAuthenticator([]byte(cfg.Auth.SecretKey), cfg.Auth.KeyID, cfg.Auth.Algorithm, f)
+	authenticator, err := auth.NewAuthenticator([]byte(cfg.Auth.SecretKey), cfg.Auth.KeyID, cfg.Auth.Algorithm, f, cache)
 	if err != nil {
 		return errors.Wrap(err, "constructing authenticator")
 	}
