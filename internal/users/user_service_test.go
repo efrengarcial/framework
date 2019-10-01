@@ -2,10 +2,10 @@ package users
 
 import (
 	"context"
+	"github.com/efrengarcial/framework/internal/domain"
 	"os"
 	"testing"
 
-	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/efrengarcial/framework/internal/users/mocks"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -32,7 +32,7 @@ func init() {
 func TestInsert(t *testing.T) {
 	mockUserRepository :=  new(mocks.UserRepository)
 
-	mockAuthority := Authority{Model: base.Model{ID: 1}}
+	mockAuthority := Authority{Model: domain.Model{ID: 1}}
 
 	mockUser := &User{
 		FirstName: "Juan",

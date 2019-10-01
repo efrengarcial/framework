@@ -1,10 +1,10 @@
 package delivery
 
 import (
+	"github.com/efrengarcial/framework/internal/domain"
 	"net/http"
 	"strconv"
 
-	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/efrengarcial/framework/internal/users"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -67,7 +67,7 @@ func (h *userHandler) updateUser(c *gin.Context) {
 
 func (h *userHandler) findAll(c *gin.Context) {
 	//span := trace.FromContext(c.Request.Context())
-	pageable :=  new(base.Pageable)
+	pageable :=  &domain.Pageable{}
 	page, err := strconv.Atoi(c.Query("page"))
 	limit, err := strconv.Atoi(c.Query("limit"))
 	pageable.Page = page

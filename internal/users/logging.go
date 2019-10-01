@@ -2,9 +2,9 @@ package users
 
 import (
 	"context"
+	"github.com/efrengarcial/framework/internal/domain"
 	"time"
 
-	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 )
@@ -38,6 +38,6 @@ func (s *loggingService) Update(ctx context.Context, user *User) (*User, error) 
 }
 
 
-func (s *loggingService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{})(*base.Pagination, error) {
+func (s *loggingService) FindAll(ctx context.Context, pageable *domain.Pageable, result interface{}, where string, args ...interface{})(*domain.Pagination, error) {
 	return s.FindAll(ctx, pageable, result, where, args...)
 }

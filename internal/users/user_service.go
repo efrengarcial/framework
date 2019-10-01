@@ -2,11 +2,11 @@ package users
 
 import (
 	"context"
+	"github.com/efrengarcial/framework/internal/domain"
 	"strings"
 	"time"
 
 	"github.com/efrengarcial/framework/internal/platform"
-	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,7 +16,7 @@ import (
 type UserService interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
-	FindAll(ctx context.Context, pageable *base.Pageable, result interface{},  where string, args ...interface{})(*base.Pagination, error)
+	FindAll(ctx context.Context, pageable *domain.Pageable, result interface{},  where string, args ...interface{})(*domain.Pagination, error)
 }
 
 
@@ -102,6 +102,6 @@ func (service *userService) Update(ctx context.Context, user *User) (*User, erro
 }
 
 
-func (service *userService) FindAll(ctx context.Context, pageable *base.Pageable, result interface{}, where string, args ...interface{}) (*base.Pagination, error){
+func (service *userService) FindAll(ctx context.Context, pageable *domain.Pageable, result interface{}, where string, args ...interface{}) (*domain.Pagination, error){
 	return service.repository.FindAllPageable(ctx, pageable, result, where, args...)
 }

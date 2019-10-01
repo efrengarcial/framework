@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
+	"github.com/efrengarcial/framework/internal/domain"
 
 	"github.com/efrengarcial/framework/internal/platform/database"
-	base "github.com/efrengarcial/framework/internal/platform/model"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
@@ -22,7 +22,7 @@ func (repo GormRepository) DB() *gorm.DB {
 	return repo.db
 }
 
-func (repo GormRepository) Insert(ctx context.Context, model base.IModel) (base.IModel, error){
+func (repo GormRepository) Insert(ctx context.Context, model domain.IModel) (domain.IModel, error){
 	orm := ocgorm.WithContext(ctx, repo.db)
 	if err := model.Validate(); err != nil{
 		return nil,  errors.WithStack(err)
@@ -33,7 +33,7 @@ func (repo GormRepository) Insert(ctx context.Context, model base.IModel) (base.
 	return model, nil
 }
 
-func (repo GormRepository) Update(model base.IModel) error {
+func (repo GormRepository) Update(model domain.IModel) error {
 	if err := model.Validate(); err != nil{
 		return  errors.WithStack(err)
 	}
@@ -43,7 +43,7 @@ func (repo GormRepository) Update(model base.IModel) error {
 	return nil
 }
 
-func (repo GormRepository) Save(model base.IModel) (uint64, error){
+func (repo GormRepository) Save(model domain.IModel) (uint64, error){
 	if err := model.Validate(); err != nil{
 		return 0, errors.WithStack(err)
 	}
@@ -53,14 +53,14 @@ func (repo GormRepository) Save(model base.IModel) (uint64, error){
 	return model.GetID(), nil
 }
 
-func (repo GormRepository) Find(receiver base.IModel, id uint64) error {
+func (repo GormRepository) Find(receiver domain.IModel, id uint64) error {
 	if err := repo.db.Where("id = ?", id).Find(receiver).Error; err != nil{
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func (repo GormRepository) FindFirst(receiver base.IModel, where string, args ...interface{}) error {
+func (repo GormRepository) FindFirst(receiver domain.IModel, where string, args ...interface{}) error {
 	if err := repo.db.Where(where, args...).Limit(1).Find(receiver).Error; err != nil{
 		return errors.WithStack(err)
 	}
@@ -74,7 +74,7 @@ func (repo GormRepository) FindAll(result interface{}, where string, args ...int
 	return nil
 }
 
-func (repo GormRepository) FindAllPageable(ctx context.Context, pageable *base.Pageable, result interface{},  where string, args ...interface{} ) (*base.Pagination, error) {
+func (repo GormRepository) FindAllPageable(ctx context.Context, pageable *domain.Pageable, result interface{},  where string, args ...interface{} ) (*domain.Pagination, error) {
 	//http://jinzhu.me/gorm/crud.html#query
 	//err := repo.db.Table("users").Select("users.name, emails.email").Joins("left join emails on emails.user_id = users.id").Scan(&result)
 	//repo.db = repo.db.Model(pageable.Model).Where(where, args)
@@ -93,13 +93,13 @@ func (repo GormRepository) FindAllPageable(ctx context.Context, pageable *base.P
 	return pagination,  nil
 }
 
-func (repo GormRepository) Delete(model base.IModel) error {
+func (repo GormRepository) Delete(model domain.IModel) error {
 	if err := repo.db.Delete(&model).Error; err != nil{
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
-func (repo GormRepository) NewRecord(model base.IModel) bool {
+func (repo GormRepository) NewRecord(model domain.IModel) bool {
 	return repo.db.NewRecord(&model)
 }

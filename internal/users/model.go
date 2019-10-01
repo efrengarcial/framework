@@ -1,9 +1,9 @@
 package users
 
 import (
+	"github.com/efrengarcial/framework/internal/domain"
 	"time"
 
-	base "github.com/efrengarcial/framework/internal/platform/model"
 	. "github.com/markbates/pop/nulls"
 	"github.com/thoas/go-funk"
 )
@@ -11,7 +11,7 @@ import (
 
 // User represents a user in the system.
 type User struct {
-	base.Model
+	domain.Model
 	TenantId		Int64     `json:"tenantId"`
 	Login	  		string    `json:"login" binding:"required" gorm:"not null"`
 	Password  		string    `json:"password" binding:"required" gorm:"not null"`
@@ -28,7 +28,7 @@ type User struct {
 }
 
 type Authority struct {
-	base.Model
+	domain.Model
 	Name 		string 			`json:"name" binding:"required" gorm:"not null"`
 	TenantId	Int64	  		`json:"tenantId"`
 	Privileges  []Privilege 	`gorm:"many2many:fw_authority_privilege;association_autoupdate:false;association_autocreate:false"`
