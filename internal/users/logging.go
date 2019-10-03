@@ -20,7 +20,7 @@ func NewLoggingService(logger log.Logger, s UserService) UserService {
 	return &loggingService{logger, s}
 }
 
-func (s *loggingService) Create(ctx context.Context, req *User) (u *User, err error) {
+func (s *loggingService) Create(ctx context.Context, req *domain.User) (u *domain.User, err error) {
 	defer func(begin time.Time) {
 		level.Debug(s.logger).Log(
 			"method", "Create",
@@ -33,7 +33,7 @@ func (s *loggingService) Create(ctx context.Context, req *User) (u *User, err er
 	return s.Create(ctx, req)
 }
 
-func (s *loggingService) Update(ctx context.Context, user *User) (*User, error) {
+func (s *loggingService) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
 	return s.Update(ctx, user)
 }
 

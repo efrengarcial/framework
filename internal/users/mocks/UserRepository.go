@@ -3,8 +3,8 @@
 package mocks
 
 import (
+	"github.com/efrengarcial/framework/internal/domain"
 	"github.com/efrengarcial/framework/internal/platform/database"
-	"github.com/efrengarcial/framework/internal/users"
 	service2 "github.com/efrengarcial/framework/internal/users/service"
 	"github.com/stretchr/testify/mock"
 )
@@ -106,15 +106,15 @@ func (_m *UserRepository) FindFirst(receiver service2.IModel, where string, args
 }
 
 // FindOneByEmail provides a mock function with given fields: login
-func (_m *UserRepository) FindOneByEmail(login string) (*users.User, error) {
+func (_m *UserRepository) FindOneByEmail(login string) (*domain.User, error) {
 	ret := _m.Called(login)
 
-	var r0 *users.User
-	if rf, ok := ret.Get(0).(func(string) *users.User); ok {
+	var r0 *domain.User
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
 		r0 = rf(login)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*users.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
@@ -129,15 +129,15 @@ func (_m *UserRepository) FindOneByEmail(login string) (*users.User, error) {
 }
 
 // FindOneByLogin provides a mock function with given fields: login
-func (_m *UserRepository) FindOneByLogin(login string) (*users.User, error) {
+func (_m *UserRepository) FindOneByLogin(login string) (*domain.User, error) {
 	ret := _m.Called(login)
 
-	var r0 *users.User
-	if rf, ok := ret.Get(0).(func(string) *users.User); ok {
+	var r0 *domain.User
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
 		r0 = rf(login)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*users.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
@@ -152,15 +152,15 @@ func (_m *UserRepository) FindOneByLogin(login string) (*users.User, error) {
 }
 
 // GetByEmail provides a mock function with given fields: email
-func (_m *UserRepository) GetByEmail(email string) (*users.User, error) {
+func (_m *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	ret := _m.Called(email)
 
-	var r0 *users.User
-	if rf, ok := ret.Get(0).(func(string) *users.User); ok {
+	var r0 *domain.User
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
 		r0 = rf(email)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*users.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
@@ -175,15 +175,15 @@ func (_m *UserRepository) GetByEmail(email string) (*users.User, error) {
 }
 
 // GetByLogin provides a mock function with given fields: login
-func (_m *UserRepository) GetByLogin(login string) (*users.User, error) {
+func (_m *UserRepository) GetByLogin(login string) (*domain.User, error) {
 	ret := _m.Called(login)
 
-	var r0 *users.User
-	if rf, ok := ret.Get(0).(func(string) *users.User); ok {
+	var r0 *domain.User
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
 		r0 = rf(login)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*users.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 

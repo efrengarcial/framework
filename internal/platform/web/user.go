@@ -3,8 +3,7 @@ package web
 
 import (
 	"context"
-
-	"github.com/efrengarcial/framework/internal/users"
+	"github.com/efrengarcial/framework/internal/domain"
 )
 
 // key is an unexported type for keys defined in this package.
@@ -17,12 +16,12 @@ type key int
 var userKey key
 
 // NewContext returns a new Context that carries value u.
-func NewContext(ctx context.Context, u *users.User) context.Context {
+func NewContext(ctx context.Context, u *domain.User) context.Context {
 	return context.WithValue(ctx, userKey, u)
 }
 
 // FromContext returns the User value stored in ctx, if any.
-func FromContext(ctx context.Context) (*users.User, bool) {
-	u, ok := ctx.Value(userKey).(*users.User)
+func FromContext(ctx context.Context) (*domain.User, bool) {
+	u, ok := ctx.Value(userKey).(*domain.User)
 	return u, ok
 }

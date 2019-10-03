@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"github.com/efrengarcial/framework/internal/domain"
 	"net/http"
 
 	"github.com/efrengarcial/framework/internal/users"
@@ -16,13 +17,13 @@ type authHandler struct {
 
 
 func (h *authHandler) signIn(c *gin.Context) {
-	var loginVM users.LoginVM
+	var loginVM domain.LoginVM
 	if err := c.ShouldBindJSON(&loginVM); err != nil {
 		c.Error(err)
 		return
 	}
 
-	token:= new(users.Token)
+	token:= new(domain.Token)
 	err := h.service.Auth(c.Request.Context(), &loginVM, token)
 	if err != nil {
 		switch err {

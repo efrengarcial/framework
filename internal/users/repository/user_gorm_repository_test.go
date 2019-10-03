@@ -11,7 +11,6 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/efrengarcial/framework/internal/platform/repository"
-	"github.com/efrengarcial/framework/internal/users"
 	"github.com/go-test/deep"
 	"github.com/jinzhu/gorm"
 	. "github.com/markbates/pop/nulls"
@@ -38,7 +37,7 @@ func  Test_repository_Find(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-	user := new(users.User)
+	user := new(domain.User)
 
 	var (
 		id  uint64  = 1
@@ -54,7 +53,7 @@ func  Test_repository_Find(t *testing.T) {
 	err = repository.Find(user, id)
 
 	assert.NoError(t, err)
-	assert.Nil(t, deep.Equal(&users.User{ Model : domain.Model{ ID: id}, Login: login}, user))
+	assert.Nil(t, deep.Equal(&domain.User{ Model : domain.Model{ ID: id}, Login: login}, user))
 }
 
 func Test_repository_Create(t *testing.T) {
@@ -70,7 +69,7 @@ func Test_repository_Create(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-	user := &users.User{ Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+	user := &domain.User{ Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
@@ -102,7 +101,7 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
 
-	authority := users.Authority{Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
+	authority := domain.Authority{Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, Name: roleAdmin , TenantId:tenantId}
 
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "fw_authority"  `)).
 		WithArgs(AnyTime{}, AnyTime{}, authority.CreatedBy, authority.LastModifiedBy, roleAdmin, tenantId).WillReturnRows(
@@ -110,11 +109,11 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 
 	repository.Insert(context.Background(), &authority)
 
-	existAuthority :=  users.Authority{Model : domain.Model{ID: id}}
+	existAuthority :=  domain.Authority{Model : domain.Model{ID: id}}
 
-	user := &users.User{ Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
+	user := &domain.User{ Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId, Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk" ,
-		Authorities: []users.Authority{existAuthority }}
+		Authorities: []domain.Authority{existAuthority }}
 
 	mock.ExpectQuery( regexp.QuoteMeta(
 		`INSERT INTO "fw_user" `)).
@@ -148,7 +147,7 @@ func Test_repository_Save(t *testing.T) {
 	require.NoError(t, err)
 	DB.LogMode(true)
 	repository := repository.NewGormRepository(DB)
-	user := &users.User{ Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
+	user := &domain.User{ Model : domain.Model{CreatedBy: "user", LastModifiedBy: "user"}, TenantId: tenantId,  Login:"user", LastName:"user", FirstName:"user",
 		Activated:true , ResetKey: "", LangKey:"us", ActivationKey:"", Email:"user@home", ImageUrl:"", Password:"erfsdkkdk"}
 
 	sql := regexp.QuoteMeta(
@@ -181,7 +180,7 @@ func  Test_repository_FindAll(t *testing.T) {
 	var (
 		id  uint64  = 1
 		login = "user"
-		users []users.User
+		users []domain.User
 	)
 
 	mock.ExpectQuery(regexp.QuoteMeta(
@@ -209,7 +208,7 @@ func  Test_repository_FindAllPageable(t *testing.T) {
 	var (
 		id  uint64  = 1
 		login = "user"
-		users []users.User
+		users []domain.User
 	)
 
 	mock.ExpectQuery(regexp.QuoteMeta(

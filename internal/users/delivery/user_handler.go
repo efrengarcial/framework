@@ -17,7 +17,7 @@ type userHandler struct {
 
 func (h *userHandler) createUser(c *gin.Context) {
 
-	var user *users.User
+	var user *domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.Error(err)
 		return
@@ -43,7 +43,7 @@ func (h *userHandler) createUser(c *gin.Context) {
 
 func (h *userHandler) updateUser(c *gin.Context) {
 
-	var user *users.User
+	var user *domain.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.Error(err)
 		return
@@ -74,7 +74,7 @@ func (h *userHandler) findAll(c *gin.Context) {
 	pageable.Limit = limit
 	pageable.OrderBy= c.QueryArray("orderBy")
 
-	var usersList []users.User
+	var usersList []domain.User
 	//pageable := model.Pageable{Page:1 , Limit: 10 , OrderBy: []string{"id desc"} , ShowSQL:true}
 	_, err = h.service.FindAll(c.Request.Context(), pageable, &usersList, "")
 	if err != nil {
@@ -82,7 +82,7 @@ func (h *userHandler) findAll(c *gin.Context) {
 		return
 	}
 
-	var response = struct { Users []users.User `json:"users"` }{
+	var response = struct { Users []domain.User `json:"users"` }{
 		Users: usersList,
 	}
 

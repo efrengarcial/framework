@@ -14,8 +14,8 @@ import (
 
 // UserService describes the service.
 type UserService interface {
-	Create(ctx context.Context, user *User) (*User, error)
-	Update(ctx context.Context, user *User) (*User, error)
+	Create(ctx context.Context, user *domain.User) (*domain.User, error)
+	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 	FindAll(ctx context.Context, pageable *domain.Pageable, result interface{},  where string, args ...interface{})(*domain.Pagination, error)
 }
 
@@ -36,10 +36,10 @@ func NewService(rep UserRepository, logger *logrus.Logger) *userService {
 
 //https://github.com/pkg/errors
 //https://medium.com/@hussachai/error-handling-in-go-a-quick-opinionated-guide-9199dd7c7f76
-func (service *userService) Create(ctx context.Context, user *User) (*User, error) {
+func (service *userService) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
 	var  (
 		err error
-		existingUser *User
+		existingUser *domain.User
 	)
 
 	if user.ID > 0 {
@@ -75,14 +75,14 @@ func (service *userService) Create(ctx context.Context, user *User) (*User, erro
 	if err != nil { return nil, err}
 
 
-	return newUser.(*User), nil
+	return newUser.(*domain.User), nil
 }
 
 
-func (service *userService) Update(ctx context.Context, user *User) (*User, error) {
+func (service *userService) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
 	var  (
 		err error
-		existingUser *User
+		existingUser *domain.User
 	)
 
 	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(user.Email)); existingUser != nil && user.ID !=  existingUser.ID {

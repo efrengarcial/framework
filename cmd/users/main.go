@@ -4,11 +4,10 @@ import (
 	"context"
 	"expvar"
 	"fmt"
+	"github.com/efrengarcial/framework/internal/domain"
 	"github.com/efrengarcial/framework/internal/platform/cache"
 
 	"github.com/efrengarcial/framework/internal/platform/auth"
-	"github.com/efrengarcial/framework/internal/users"
-
 	"net/http"
 	"os"
 	"os/signal"
@@ -152,7 +151,7 @@ func run()  error {
 	// into database columns/types etc. This will
 	// check for changes and migrate them each time
 	// this service is restarted.
-	db.AutoMigrate(&users.User{}, &users.Authority{}, &users.Privilege{})
+	db.AutoMigrate(&domain.User{}, &domain.Authority{}, &domain.Privilege{})
 
 	// =========================================================================
 	// Start Tracing Support

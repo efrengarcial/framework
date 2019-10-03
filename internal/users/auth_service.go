@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"github.com/efrengarcial/framework/internal/domain"
 	"time"
 
 	"github.com/efrengarcial/framework/internal/platform/auth"
@@ -13,7 +14,7 @@ import (
 
 // AuthService has the logic authentication
 type AuthService interface {
-	Auth(ctx context.Context, req *LoginVM, res *Token) error
+	Auth(ctx context.Context, req *domain.LoginVM, res *domain.Token) error
 }
 
 type authService struct {
@@ -31,7 +32,7 @@ func NewAuthService(rep UserRepository, authenticator *auth.Authenticator, logge
 	}
 }
 
-func (service *authService) Auth(ctx context.Context, req *LoginVM, tkn *Token) error {
+func (service *authService) Auth(ctx context.Context, req *domain.LoginVM, tkn *domain.Token) error {
 	user, err := service.repo.GetByLogin(ctx , req.UserName)
 	if err != nil {
 		return err
