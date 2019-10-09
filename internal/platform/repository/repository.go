@@ -9,7 +9,7 @@ import (
 type Repository interface {
 
 	// Insert puts a new instance of the give Model in the database
-	Insert(ctx context.Context, model domain.IModel) (domain.IModel, error)
+	Insert(ctx context.Context, model domain.IModel) error
 
 	Update(model domain.IModel) error
 

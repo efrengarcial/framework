@@ -1,9 +1,8 @@
 package mid
 
 import (
-	"context"
-	"fmt"
 	"github.com/efrengarcial/framework/internal/platform/auth"
+	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -29,30 +28,35 @@ func Authenticate(authenticator *auth.Authenticator) gin.HandlerFunc {
 					"path" : c.Request.URL.Path, "status" : http.StatusUnauthorized})
 			return
 		}
-
-		fmt.Println(claims.Subject)
 		// Add claims to the context so they can be retrieved later.
-		ctx := context.WithValue(c.Request.Context(), auth.Key, claims)
-		c.Request = c.Request.WithContext(ctx)
-		c.Next()
-	}
-}
-
-// HasRole validates that an authenticated user has at least one Role from a
-// specified list. This method constructs the actual function that is used.
-func HasRole(roles ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		claims, ok := c.Request.Context().Value(auth.Key).(auth.Claims)
-		if !ok {
-			//claims missing from context: HasRole called without/before Authenticate
+		ctx, err := authenticator.SetUser(c.Request.Context(), claims.Subject)
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized,
 				gin.H{"error": "error.http.401", "title" : "Unauthorized",  "detail" : "Bad credentials" ,
 					"path" : c.Request.URL.Path, "status" : http.StatusUnauthorized})
 			return
 		}
 
-		if !claims.HasRole(roles...) {
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	}
+}
+
+// HasPermission validates that an authenticated user has at least one Permission from a
+// specified list. This method constructs the actual function that is used.
+func HasPermission(permissions ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		claims, ok := web.FromContext(c.Request.Context())
+		if !ok {
+			//claims missing from context: HasPermission called without/before Authenticate
+			c.AbortWithStatusJSON(http.StatusUnauthorized,
+				gin.H{"error": "error.http.401", "title" : "Unauthorized",  "detail" : "Bad credentials" ,
+					"path" : c.Request.URL.Path, "status" : http.StatusUnauthorized})
+			return
+		}
+
+		if !claims.HasPermission(permissions...) {
 			//you are not authorized for that action
 			c.AbortWithStatusJSON(http.StatusForbidden,
 				gin.H{"error": "error.http.403", "title" : "Forbidden",  "detail" : "Access is denied" ,

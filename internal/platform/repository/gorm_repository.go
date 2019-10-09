@@ -22,15 +22,15 @@ func (repo GormRepository) DB() *gorm.DB {
 	return repo.db
 }
 
-func (repo GormRepository) Insert(ctx context.Context, model domain.IModel) (domain.IModel, error){
+func (repo GormRepository) Insert(ctx context.Context, model domain.IModel) error {
 	orm := ocgorm.WithContext(ctx, repo.db)
 	if err := model.Validate(); err != nil{
-		return nil,  errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 	if err := orm.Create(model).Error; err != nil{
-		return nil,  errors.WithStack(err)
+		return errors.WithStack(err)
 	}
-	return model, nil
+	return nil
 }
 
 func (repo GormRepository) Update(model domain.IModel) error {

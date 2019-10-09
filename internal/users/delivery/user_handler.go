@@ -17,13 +17,13 @@ type userHandler struct {
 
 func (h *userHandler) createUser(c *gin.Context) {
 
-	var user *domain.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	user := &domain.User{}
+	if err := c.ShouldBindJSON(user); err != nil {
 		c.Error(err)
 		return
 	}
 
-	user, err := h.service.Create(c.Request.Context(), user)
+	err := h.service.Create(c.Request.Context(), user)
 	if err != nil {
 		c.Error(err)
 		return
@@ -43,13 +43,13 @@ func (h *userHandler) createUser(c *gin.Context) {
 
 func (h *userHandler) updateUser(c *gin.Context) {
 
-	var user *domain.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	user := &domain.User{}
+	if err := c.ShouldBindJSON(user); err != nil {
 		c.Error(err)
 		return
 	}
 
-	user, err := h.service.Update(c.Request.Context(), user)
+	err := h.service.Update(c.Request.Context(), user)
 	if err != nil {
 		c.Error(err)
 		return

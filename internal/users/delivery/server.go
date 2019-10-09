@@ -4,6 +4,7 @@ import (
 	"contrib.go.opencensus.io/exporter/prometheus"
 	"github.com/efrengarcial/framework/internal/mid"
 	"github.com/efrengarcial/framework/internal/platform/auth"
+	"github.com/efrengarcial/framework/internal/platform/cache"
 	"github.com/efrengarcial/framework/internal/users"
 	"go.opencensus.io/plugin/ochttp"
 	"net/http"
@@ -21,7 +22,7 @@ func setUserRouter(api *gin.RouterGroup, us users.UserService, logger *logrus.Lo
 
 	api.Use(mid.Authenticate(authenticator))
 	{
-		api.Use(mid.HasRole(auth.RoleAdmin))
+		api.Use(mid.HasPermission(auth.RoleAdmin))
 		h := userHandler{us, logger}
 		api.POST("/users", func(c *gin.Context) {
 			ochttp.SetRoute(c.Request.Context(), "/users")
@@ -41,10 +42,12 @@ func setAuthRouter(router *gin.Engine, as users.AuthService, logger *logrus.Logg
 }
 
 //New returns a new HTTP server.
-func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter, authenticator *auth.Authenticator) http.Handler  {
+func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter, authenticator *auth.Authenticator, cache cache.Cache) http.Handler  {
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)
 	us := users.NewService(repo, logger)
+	authenticator.SetRepository(repo.GormRepository)
+	authenticator.SetCache(cache)
 	as := users.NewAuthService(repo, authenticator, logger)
 
 	app := web.NewApp(shutdown, logger)

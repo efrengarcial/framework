@@ -1,7 +1,5 @@
 package users
 
-import "errors"
-
 //https://medium.com/rungo/error-handling-in-go-f0125de052f0
 //https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully
 //https://medium.com/@sebdah/go-best-practices-error-handling-2d15e1f0c5ee
@@ -9,7 +7,6 @@ import "errors"
 var (
 	// ErrAuthenticationFailure occurs when a user attempts to authenticate but
 	// anything goes wrong.
-	ErrAuthenticationFailure = errors.New("authentication failed")
 	ErrLoginAlreadyUsed      = NewErrBadRequest( "Nombre de usuario ya utilizado!", "error.userexists", "userManagement")
 	ErrEmailAlreadyUsed      = NewErrBadRequest( "Email ya utilizado!", "error.emailexists", "userManagement")
 	ErrIdExist               = 	NewErrBadRequest("Un nuevo Usuario ya no puede tener un ID","error.idexists", "userManagement")

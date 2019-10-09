@@ -5,7 +5,6 @@ import (
 	"github.com/efrengarcial/framework/internal/domain"
 
 	"github.com/efrengarcial/framework/internal/platform/repository"
-	"github.com/efrengarcial/framework/internal/users"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
@@ -23,64 +22,64 @@ func NewUserGormRepository(db *gorm.DB) *userGormRepository {
 	return &userGormRepository{repo}
 }
 
-func (repo *userGormRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	user := &domain.User{}
+func (repo *userGormRepository) GetByEmail(ctx context.Context, email string) (domain.User, error) {
+	user := domain.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	err := orm.Preload("Authorities").Where("email = ?", email).First(&user).Error
 	if err !=nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, users.ErrAuthenticationFailure
+			return domain.User{}, domain.ErrAuthenticationFailure
 		} else {
-			return nil, errors.WithStack(err)
+			return domain.User{}, errors.WithStack(err)
 		}
 	}
 	return user, nil
 }
 
-func (repo *userGormRepository) GetByLogin(ctx context.Context, login string) (*domain.User, error) {
-	user := &domain.User{}
+func (repo *userGormRepository) GetByLogin(ctx context.Context, login string) (domain.User, error) {
+	user := domain.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	err := orm.Preload("Authorities").Where("login = ?", login).First(&user).Error
 	if err !=nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, users.ErrAuthenticationFailure
+			return domain.User{}, domain.ErrAuthenticationFailure
 		} else {
-			return nil, errors.WithStack(err)
+			return domain.User{}, errors.WithStack(err)
 		}
 	}
 
 	return user, nil
 }
 
-func (repo *userGormRepository) FindOneByLogin(ctx context.Context, login string) (*domain.User, error) {
-	user := &domain.User{}
+func (repo *userGormRepository) FindOneByLogin(ctx context.Context, login string) (domain.User, error) {
+	user := domain.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	var err error
 	err = orm.Where("login = ?", login).First(&user).Error
 
 	if gorm.IsRecordNotFoundError(err) {
-		return nil, nil
+		return domain.User{}, nil
 	}
 
 	if err != nil {
-		return  nil,  errors.WithStack(err)
+		return  domain.User{},  errors.WithStack(err)
 	}
 
 	return user, nil
 }
 
-func (repo *userGormRepository) FindOneByEmail(ctx context.Context, login string) (*domain.User, error) {
-	user := &domain.User{}
+func (repo *userGormRepository) FindOneByEmail(ctx context.Context, login string) (domain.User, error) {
+	user := domain.User{}
 	orm := ocgorm.WithContext(ctx, repo.DB())
 	var err error
 	err = orm.Where("email = ?", login).First(&user).Error
 
 	if gorm.IsRecordNotFoundError(err) {
-		return nil, nil
+		return domain.User{}, nil
 	}
 
 	if err != nil {
-		return  nil, errors.WithStack(err)
+		return  domain.User{}, errors.WithStack(err)
 	}
 
 	return user, nil

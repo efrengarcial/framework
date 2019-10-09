@@ -41,7 +41,7 @@ func (service *authService) Auth(ctx context.Context, req *domain.LoginVM, tkn *
 	// Compares our given password against the hashed password
 	// stored in the database
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return ErrAuthenticationFailure
+		return domain.ErrAuthenticationFailure
 	}
 	// If we are this far the request is valid. Create some claims for the user
 	// and generate their token.

@@ -5,9 +5,8 @@ import (
 	"expvar"
 	"fmt"
 	"github.com/efrengarcial/framework/internal/domain"
-	"github.com/efrengarcial/framework/internal/platform/cache"
-
 	"github.com/efrengarcial/framework/internal/platform/auth"
+	"github.com/efrengarcial/framework/internal/platform/cache"
 	"net/http"
 	"os"
 	"os/signal"
@@ -57,7 +56,7 @@ func run()  error {
 	// Configuration
 	var cfg struct {
 		Web struct {
-			APIHost         string        `conf:"default:0.0.0.0:8080"`
+			APIHost         string        `conf:"default:0.0.0.0:8181"`
 			DebugHost       string        `conf:"default:0.0.0.0:4000"`
 			ReadTimeout     time.Duration `conf:"default:60s"`
 			WriteTimeout    time.Duration `conf:"default:60s"`
@@ -111,13 +110,9 @@ func run()  error {
 
 	// =========================================================================
 	// Initialize authentication support
-	cache := cache.NewRedisCache(cache.RedisOpts{
-		Host:       "",
-		Expiration: time.Hour,
-	})
 
 	f := auth.NewSimpleKeyLookupFunc(cfg.Auth.KeyID,  []byte(cfg.Auth.SecretKey))
-	authenticator, err := auth.NewAuthenticator([]byte(cfg.Auth.SecretKey), cfg.Auth.KeyID, cfg.Auth.Algorithm, f, cache)
+	authenticator, err := auth.NewAuthenticator([]byte(cfg.Auth.SecretKey), cfg.Auth.KeyID, cfg.Auth.Algorithm, f)
 	if err != nil {
 		return errors.Wrap(err, "constructing authenticator")
 	}
@@ -209,8 +204,11 @@ func run()  error {
 
 	// =========================================================================
 	// Start API Service
-
 	logger.Info("main : Started : Initializing API support")
+	cache := cache.NewRedisCache(cache.RedisOpts{
+		Host:       "",
+		Expiration: time.Hour,
+	})
 
 	// Make a channel to listen for an interrupt or terminate signal from the OS.
 	// Use a buffered channel because the signal package requires it.
@@ -220,7 +218,7 @@ func run()  error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      delivery.New(shutdown, db, logger, exporter, authenticator),
+		Handler:      delivery.New(shutdown, db, logger, exporter, authenticator, cache),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

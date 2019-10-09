@@ -14,8 +14,8 @@ type MultiTenantEntity interface {
 //BaseModel
 type Model struct {
 	ID        uint64      	`json:"id,string" gorm:"type:bigint(20) unsigned auto_increment;not null;primary_key`
-	CreatedAt time.Time 	`json:"createdAt,omitempty" gorm:"type:timestamp; not null"`
-	UpdatedAt time.Time 	`json:"updatedAt,omitempty" gorm:"type:timestamp; not null"`
+	CreatedAt time.Time 	`json:"createdAt,omitempty" gorm:"type:timestamp with time zone; not null"`
+	UpdatedAt time.Time 	`json:"updatedAt,omitempty" gorm:"type:timestamp with time zone; not null"`
 	CreatedBy string 		`json:"createdBy"`
 	LastModifiedBy string   `json:"lastModifiedBy"`
 	//DeletedAt *time.Time	`json:"deletedAt"`

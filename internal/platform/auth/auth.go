@@ -1,11 +1,16 @@
 package auth
 
 import (
+	"context"
 	"fmt"
-	"github.com/efrengarcial/framework/internal/platform/cache"
-
 	"github.com/dgrijalva/jwt-go"
+	"github.com/efrengarcial/framework/internal/domain"
+	"github.com/efrengarcial/framework/internal/platform/cache"
+	"github.com/efrengarcial/framework/internal/platform/repository"
+	"github.com/efrengarcial/framework/internal/platform/web"
 	"github.com/pkg/errors"
+	"github.com/sagikazarmark/go-gin-gorm-opencensus/pkg/ocgorm"
+	"time"
 )
 
 // KeyLookupFunc is used to map a JWT key id (kid) to the corresponding key.
@@ -40,9 +45,10 @@ type Authenticator struct {
 	privateKey       []byte
 	activeKID        string
 	algorithm        string
-	cacheService     *cache.Cache
 	pubKeyLookupFunc KeyLookupFunc
 	parser           *jwt.Parser
+	cache            cache.Cache
+	repo             repository.GormRepository
 }
 
 // NewAuthenticator creates an *Authenticator for use. It will error if:
@@ -50,7 +56,7 @@ type Authenticator struct {
 // - The public key func is nil.
 // - The key ID is blank.
 // - The specified algorithm is unsupported.
-func NewAuthenticator(privateKey []byte, activeKID, algorithm string, publicKeyLookupFunc KeyLookupFunc, cache cache.Cache) (*Authenticator, error) {
+func NewAuthenticator(privateKey []byte, activeKID, algorithm string, publicKeyLookupFunc KeyLookupFunc) (*Authenticator, error) {
 	if  privateKey == nil {
 		return nil, errors.New("private key cannot be nil")
 	}
@@ -74,10 +80,38 @@ func NewAuthenticator(privateKey []byte, activeKID, algorithm string, publicKeyL
 		algorithm:        algorithm,
 		pubKeyLookupFunc: publicKeyLookupFunc,
 		parser:           &parser,
-		cacheService: 	  &cache,
 	}
 
 	return &a, nil
+}
+
+func (a *Authenticator) SetRepository(repo repository.GormRepository)  {
+	a.repo = repo
+}
+
+func (a *Authenticator) SetCache(cache cache.Cache)  {
+	a.cache = cache
+}
+
+func (a *Authenticator) SetUser(ctx context.Context, login string) (context.Context, error) {
+
+	user := &domain.User{}
+	err := a.cache.Get("user", &user)
+
+	if err != nil || user.ID == 0 {
+		orm := ocgorm.WithContext(ctx, a.repo.DB())
+		err := orm.Preload("Authorities.Privileges").Where("login = ?", login).First(&user).Error
+		if err !=nil {
+			return nil, err
+		}
+		user.SetPermissions()
+		if err = a.cache.Set("user", user, time.Hour); err != nil {
+			return nil, err
+		}
+	}
+
+
+	return web.NewContext(ctx,user), nil
 }
 
 // GenerateToken generates a signed JWT token string representing the user Claims.
