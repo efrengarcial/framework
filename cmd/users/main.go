@@ -15,7 +15,7 @@ import (
 
 	"contrib.go.opencensus.io/exporter/prometheus"
 	"contrib.go.opencensus.io/exporter/zipkin"
-	"github.com/efrengarcial/framework/internal/platform/conf"
+	"github.com/ardanlabs/conf"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/delivery"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
