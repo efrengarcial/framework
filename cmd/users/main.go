@@ -4,7 +4,6 @@ import (
 	"context"
 	"expvar"
 	"fmt"
-	"github.com/efrengarcial/framework/internal/domain"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/efrengarcial/framework/internal/platform/cache"
 	"net/http"
@@ -15,7 +14,7 @@ import (
 
 	"contrib.go.opencensus.io/exporter/prometheus"
 	"contrib.go.opencensus.io/exporter/zipkin"
-	"github.com/ardanlabs/conf"
+	"github.com/caarlos0/env/v6"
 	"github.com/efrengarcial/framework/internal/platform/database"
 	"github.com/efrengarcial/framework/internal/users/delivery"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -29,6 +28,35 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )
+
+type config struct {
+	Web struct {
+		APIHost         string        `envDefault:"0.0.0.0:8181"`
+		DebugHost       string        `envDefault:"0.0.0.0:4000"`
+		ReadTimeout     time.Duration `envDefault:"60s"`
+		WriteTimeout    time.Duration `envDefault:"60s"`
+		ShutdownTimeout time.Duration `envDefault:"5s"`
+	}
+	DB struct {
+		User       string `envDefault:"postgres"`
+		Password   string `envDefault:"password"`
+		Host       string `env:"DB_HOST" envDefault:"0.0.0.0"`
+		Name       string `envDefault:"postgres"`
+		DisableTLS bool   `envDefault:"true"`
+	}
+	Auth struct {
+		KeyID          string `envDefault:"1"`
+		PrivateKeyFile string `envDefault:"/app/private.pem"`
+		SecretKey	   string `envDefault:"mySuperSecretKeyLol"`
+		Algorithm      string `envDefault:"HS512"`
+	}
+	Zipkin struct {
+		LocalEndpoint string  `envDefault:"0.0.0.0:3000"`
+		ReporterURI   string  `envDefault:"http://zipkin:9411/api/v2/spans"`
+		ServiceName   string  `envDefault:"users-api"`
+		Probability   float64 `envDefault:"0.05"`
+	}
+}
 
 // Create a new instance of the logger. You can have any number of instances.
 var (
@@ -54,44 +82,9 @@ func run()  error {
 
 	// =========================================================================
 	// Configuration
-	var cfg struct {
-		Web struct {
-			APIHost         string        `conf:"default:0.0.0.0:8181"`
-			DebugHost       string        `conf:"default:0.0.0.0:4000"`
-			ReadTimeout     time.Duration `conf:"default:60s"`
-			WriteTimeout    time.Duration `conf:"default:60s"`
-			ShutdownTimeout time.Duration `conf:"default:5s"`
-		}
-		DB struct {
-			User       string `conf:"default:postgres"`
-			Password   string `conf:"default:password,noprint"`
-			Host       string `conf:"default:0.0.0.0"`
-			Name       string `conf:"default:postgres"`
-			DisableTLS bool   `conf:"default:true"`
-		}
-		Auth struct {
-			KeyID          string `conf:"default:1"`
-			PrivateKeyFile string `conf:"default:/app/private.pem"`
-			SecretKey	   string `conf:"default:mySuperSecretKeyLol"`
-			Algorithm      string `conf:"default:HS512"`
-		}
-		Zipkin struct {
-			LocalEndpoint string  `conf:"default:0.0.0.0:3000"`
-			ReporterURI   string  `conf:"default:http://zipkin:9411/api/v2/spans"`
-			ServiceName   string  `conf:"default:users-api"`
-			Probability   float64 `conf:"default:0.05"`
-		}
-	}
+	cfg := config{}
 
-	if err := conf.Parse(os.Args[1:], "USERS", &cfg); err != nil {
-		if err == conf.ErrHelpWanted {
-			usage, err := conf.Usage("USERS", &cfg)
-			if err != nil {
-				return errors.Wrap(err, "generating config usage")
-			}
-			fmt.Println(usage)
-			return nil
-		}
+	if err := env.Parse(&cfg); err != nil {
 		return errors.Wrap(err, "parsing config")
 	}
 	// =========================================================================
@@ -100,13 +93,9 @@ func run()  error {
 	// Print the build version for our logs. Also expose it under /debug/vars.
 	expvar.NewString("build").Set(build)
 	logger.Info("main : Started : Application Initializing version ", build)
-	defer log.Println("main : Completed")
+	defer logger.Info("main : Completed")
 
-	out, err := conf.String(&cfg)
-	if err != nil {
-		return errors.Wrap(err, "generating config for output")
-	}
-	logger.Info("main : Config : ", out)
+	fmt.Printf("main : Config : %+v\n", cfg)
 
 	// =========================================================================
 	// Initialize authentication support
@@ -146,7 +135,7 @@ func run()  error {
 	// into database columns/types etc. This will
 	// check for changes and migrate them each time
 	// this service is restarted.
-	db.AutoMigrate(&domain.User{}, &domain.Authority{}, &domain.Privilege{})
+	//db.AutoMigrate(&domain.User{}, &domain.Authority{}, &domain.Privilege{})
 
 	// =========================================================================
 	// Start Tracing Support
