@@ -5,20 +5,20 @@ import (
 	"github.com/efrengarcial/framework/internal/mid"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/efrengarcial/framework/internal/platform/cache"
-	"github.com/efrengarcial/framework/internal/users"
+	"github.com/efrengarcial/framework/internal/user"
 	"go.opencensus.io/plugin/ochttp"
 	"net/http"
 	"os"
 
 	"github.com/efrengarcial/framework/internal/platform/web"
-	"github.com/efrengarcial/framework/internal/users/repository"
+	"github.com/efrengarcial/framework/internal/user/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sirupsen/logrus"
 )
 
-func setUserRouter(api *gin.RouterGroup, us users.UserService, logger *logrus.Logger, authenticator *auth.Authenticator) {
+func setUserRouter(api *gin.RouterGroup, us user.UserService, logger *logrus.Logger, authenticator *auth.Authenticator) {
 
 	api.Use(mid.Authenticate(authenticator))
 	{
@@ -36,7 +36,7 @@ func setUserRouter(api *gin.RouterGroup, us users.UserService, logger *logrus.Lo
 	}
 }
 
-func setAuthRouter(router *gin.Engine, as users.AuthService, logger *logrus.Logger) {
+func setAuthRouter(router *gin.Engine, as user.AuthService, logger *logrus.Logger) {
 	a := authHandler{as, logger}
 	router.POST("/api/authenticate", a.signIn)
 }
@@ -45,10 +45,10 @@ func setAuthRouter(router *gin.Engine, as users.AuthService, logger *logrus.Logg
 func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter, authenticator *auth.Authenticator, cache cache.Cache) http.Handler  {
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)
-	us := users.NewService(repo, logger)
+	us := user.NewService(repo, logger)
 	authenticator.SetRepository(repo.GormRepository)
 	authenticator.SetCache(cache)
-	as := users.NewAuthService(repo, authenticator, logger)
+	as := user.NewAuthService(repo, authenticator, logger)
 
 	app := web.NewApp(shutdown, logger)
 	router := app.Engine

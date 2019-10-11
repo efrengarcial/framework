@@ -4,14 +4,14 @@ import (
 	"github.com/efrengarcial/framework/internal/domain"
 	"net/http"
 
-	"github.com/efrengarcial/framework/internal/users"
+	"github.com/efrengarcial/framework/internal/user"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 
 type authHandler struct {
-	service users.AuthService
+	service user.AuthService
 	logger  *logrus.Logger
 }
 

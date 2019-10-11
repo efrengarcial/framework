@@ -1,4 +1,4 @@
-package users
+package user
 
 //https://medium.com/rungo/error-handling-in-go-f0125de052f0
 //https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully

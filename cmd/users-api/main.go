@@ -16,7 +16,7 @@ import (
 	"contrib.go.opencensus.io/exporter/zipkin"
 	"github.com/caarlos0/env/v6"
 	"github.com/efrengarcial/framework/internal/platform/database"
-	"github.com/efrengarcial/framework/internal/users/delivery"
+	"github.com/efrengarcial/framework/internal/user/delivery"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	openzipkin "github.com/openzipkin/zipkin-go"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"

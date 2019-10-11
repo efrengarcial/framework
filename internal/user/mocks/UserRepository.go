@@ -5,7 +5,7 @@ package mocks
 import (
 	"github.com/efrengarcial/framework/internal/domain"
 	"github.com/efrengarcial/framework/internal/platform/database"
-	service2 "github.com/efrengarcial/framework/internal/users/service"
+	service2 "github.com/efrengarcial/framework/internal/user/service"
 	"github.com/stretchr/testify/mock"
 )
 

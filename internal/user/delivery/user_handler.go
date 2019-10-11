@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/efrengarcial/framework/internal/users"
+	"github.com/efrengarcial/framework/internal/user"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 type userHandler struct {
-	service users.UserService
+	service user.UserService
 	logger  *logrus.Logger
 }
 

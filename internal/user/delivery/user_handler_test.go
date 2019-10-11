@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/efrengarcial/framework/internal/platform/database"
-	"github.com/efrengarcial/framework/internal/users/repository"
+	"github.com/efrengarcial/framework/internal/user/repository"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
