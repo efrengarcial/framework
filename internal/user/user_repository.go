@@ -7,8 +7,8 @@ import (
 	"github.com/efrengarcial/framework/internal/platform/repository"
 )
 
-//mockery -name=UserRepository
-type UserRepository interface {
+//mockery -name=Repository
+type Repository interface {
 	repository.Repository
 	GetByEmail(ctx context.Context, email string) (domain.User, error)
 	GetByLogin(ctx context.Context, login string) (domain.User, error)

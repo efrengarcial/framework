@@ -11,12 +11,12 @@ import (
 
 type loggingService struct {
 	logger log.Logger
-	next   UserService
+	next   Service
 }
 
 
 // NewLoggingService returns a new instance of a logging Service.
-func NewLoggingService(logger log.Logger, s UserService) UserService {
+func NewLoggingService(logger log.Logger, s Service) Service {
 	return &loggingService{logger, s}
 }
 

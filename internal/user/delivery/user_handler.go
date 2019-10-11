@@ -11,7 +11,7 @@ import (
 )
 
 type userHandler struct {
-	service user.UserService
+	service user.Service
 	logger  *logrus.Logger
 }
 
