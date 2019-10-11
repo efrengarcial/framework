@@ -79,13 +79,12 @@ func (user *User) GetRoles() []string {
 	return nil
 }
 
-func (user *User) SetPermissions() {
+func (user *User) ConfigPermissions() {
 	if len(user.Authorities) > 0  {
 		r := funk.Map(user.Authorities, func(a Authority) string {
 			return a.Name
 		})
-		user.Permissions = make([]string, len(r.([]string)))
-		copy(user.Permissions, r.([]string))
+		user.Permissions =  append( user.Permissions , r.([]string)...)
 		for _, authority := range user.Authorities {
 			if len(authority.Privileges) > 0 {
 				p := funk.Map(authority.Privileges, func(p Privilege) string {
@@ -94,6 +93,7 @@ func (user *User) SetPermissions() {
 				user.Permissions = append(user.Permissions, p.([]string)...)
 			}
 		}
+		user.Authorities = nil
 
 	}
 }

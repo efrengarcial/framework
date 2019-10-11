@@ -104,7 +104,7 @@ func (a *Authenticator) SetUser(ctx context.Context, login string) (context.Cont
 		if err !=nil {
 			return nil, err
 		}
-		user.SetPermissions()
+		user.ConfigPermissions()
 		if err = a.cache.Set("user", user, time.Hour); err != nil {
 			return nil, err
 		}
