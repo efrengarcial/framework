@@ -73,7 +73,7 @@ func TestUpdateHandler(t *testing.T) {
 	shutdown := make(chan os.Signal, 1)
 	server := New(shutdown, db, logger)
 	user := &domain.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
-	saveUser, err := repo.Insert(context.Background(), user)
+	err := repo.Insert(context.Background(), user)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func TestUpdateHandler(t *testing.T) {
 	var  users []domain.User
 	repo.FindAll(&users, "")
 
-	var jsonStr = []byte(`{"id" : "` +  strconv.FormatUint(saveUser.GetID(), 10) + `","login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
+	var jsonStr = []byte(`{"id" : "` +  strconv.FormatUint(user.GetID(), 10) + `","login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
 	req, err := http.NewRequest("PUT", "/api/v1/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)

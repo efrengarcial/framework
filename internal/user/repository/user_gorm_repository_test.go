@@ -79,11 +79,10 @@ func Test_repository_Create(t *testing.T) {
 		WillReturnRows(
 			sqlmock.NewRows([]string{"id"}).AddRow(id))
 
-	newUser , err := repository.Insert(context.Background(), user)
-	log.Println(newUser.GetID())
+	err = repository.Insert(context.Background(), user)
+	log.Println(user.GetID())
 
 	assert.NoError(t, err)
-	assert.NotNil(t, newUser)
 }
 
 func Test_repository_Create_ExistingAuthority(t *testing.T) {
@@ -127,11 +126,10 @@ func Test_repository_Create_ExistingAuthority(t *testing.T) {
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "fw_user_authority"  `)).
 		WithArgs(id, id, id, id).WillReturnResult(sqlmock.NewResult(1, 1))
 
-	newUser , err := repository.Insert(context.Background(), user)
-	log.Println(newUser.GetID())
+	err = repository.Insert(context.Background(), user)
+	log.Println(user.GetID())
 
 	assert.NoError(t, err)
-	assert.NotNil(t, newUser)
 }
 
 func Test_repository_Save(t *testing.T) {

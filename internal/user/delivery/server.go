@@ -47,6 +47,7 @@ func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, logger)
+	us = service.NewLoggingService(logger, us)
 	authenticator.SetRepository(repo.GormRepository)
 	authenticator.SetCache(cache)
 	as := service.NewAuthService(repo, authenticator, logger)
