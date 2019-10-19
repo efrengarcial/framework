@@ -23,7 +23,7 @@ type User struct {
 	ImageUrl      string      `json:"imageUrl"`
 	ActivationKey string      `json:"-"`
 	ResetKey      string      `json:"-"`
-	ResetDate     time.Time   `json:"resetDate" gorm:"type:timestamp with time zone"`
+	ResetDate     time.Time   `json:"resetDate" gorm:"type:timestamp"`
 	Authorities   []Authority `gorm:"many2many:fw_user_authority;association_autoupdate:false;association_autocreate:false"`
 	Permissions   []string    `json:"permissions" gorm:"-"` // Ignore this field
 }

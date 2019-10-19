@@ -29,6 +29,7 @@ func NewAuthService(rep user.Repository, authenticator *auth.Authenticator, logg
 
 func (service *authService) Auth(ctx context.Context, req *domain.LoginVM, tkn *domain.Token) error {
 	user, err := service.repo.GetByLogin(ctx , req.UserName)
+
 	if err != nil {
 		return err
 	}

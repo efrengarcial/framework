@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"contrib.go.opencensus.io/exporter/prometheus"
 	"github.com/efrengarcial/framework/internal/mid"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/efrengarcial/framework/internal/platform/cache"
@@ -43,7 +42,7 @@ func setAuthRouter(router *gin.Engine, as user.AuthService, logger *logrus.Logge
 }
 
 //New returns a new HTTP server.
-func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *prometheus.Exporter, authenticator *auth.Authenticator, cache cache.Cache) http.Handler  {
+func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger /*,exporter *prometheus.Exporter */, authenticator *auth.Authenticator, cache cache.Cache) http.Handler  {
 	// Setup repositories
 	repo := repository.NewUserGormRepository(db)
 	us := service.NewService(repo, logger)
@@ -59,9 +58,9 @@ func New(shutdown chan os.Signal, db *gorm.DB, logger *logrus.Logger, exporter *
 	setUserRouter(v1, us, logger, authenticator)
 	setAuthRouter(router, as, logger)
 
-	router.GET("/metrics", func(c *gin.Context) {
+	/*router.GET("/metrics", func(c *gin.Context) {
 		exporter.ServeHTTP(c.Writer, c.Request)
-	})
+	}) */
 
 	return app
 }

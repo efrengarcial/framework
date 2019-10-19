@@ -21,6 +21,7 @@ require (
 	github.com/markbates/pop v3.60.6+incompatible
 	github.com/meson10/highbrow v0.0.0-20160505073238-88261ca7babd
 	github.com/openzipkin/zipkin-go v0.1.6
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
 	github.com/sagikazarmark/go-gin-gorm-opencensus v0.0.0-20190530122219-5cd3c9b414a5
@@ -33,4 +34,5 @@ require (
 	google.golang.org/appengine v1.6.0 // indirect
 	google.golang.org/grpc v1.20.1 // indirect
 	gopkg.in/go-playground/validator.v8 v8.18.2
+	gopkg.in/gormigrate.v1 v1.6.0
 )

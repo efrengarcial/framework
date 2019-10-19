@@ -207,7 +207,7 @@ func run()  error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      delivery.New(shutdown, db, logger, exporter, authenticator, cache),
+		Handler:      delivery.New(shutdown, db, logger /*, exporter*/, authenticator, cache),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

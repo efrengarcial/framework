@@ -2,47 +2,65 @@ package delivery
 
 import (
 	"bytes"
-	"context"
 	"github.com/efrengarcial/framework/internal/domain"
+	"github.com/efrengarcial/framework/internal/tests"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/gormigrate.v1"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"testing"
-
-	"github.com/efrengarcial/framework/internal/platform/database"
-	"github.com/efrengarcial/framework/internal/user/repository"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 )
 
-func setup() *gorm.DB {
-	// Initialize an in-memory database for full integration testing.
-	db := database.Initialize("sqlite3", ":memory:")
-	db.AutoMigrate(&domain.User{}, &domain.Authority{}, &domain.Privilege{})
-
-	return  db
+// ProductTests holds methods for each product subtest. This type allows
+// passing dependencies for tests while still providing a convenient syntax
+// when subtests are registered.
+type UserTests struct {
+	app       http.Handler
+	userToken string
 }
 
-func teardown(db *gorm.DB ) {
-	// Closing the connection discards the in-memory database.
-	db.Close()
+func start(db *gorm.DB) error {
+	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
+		// you migrations here
+	})
+
+	m.InitSchema(func(tx *gorm.DB) error {
+		err := tx.AutoMigrate(
+			&domain.User{},
+			&domain.Authority{},
+			&domain.Privilege{},
+			// all other tables of you app
+		).Error
+		if err != nil {
+			return err
+		}
+		user := &domain.User{ Login: "admin" , Email:"admin@example.com" ,Password: "$2a$10$AWLfzWwoq7es.PM3Z1uMieRAeRuck2F.kW9WeEpIdGsk4ykizXLqm"}
+		tx.Create(&user)
+
+		// all other foreign keys...
+		return nil
+	})
+
+
+	return m.Migrate()
 }
 
+//https://medium.com/@yaravind/go-sqlite-on-windows-f91ef2dacfe
 func TestCreateHandler(t *testing.T) {
-	db := setup()
 
-	logger := log.New()
-	logger.Out = os.Stdout
-	logger.Level = log.InfoLevel
-	logger.Formatter = &log.JSONFormatter{}
+	test := tests.NewIntegration(t)
+	defer test.Teardown()
+	start(test.DB)
+
 	shutdown := make(chan os.Signal, 1)
-	server := New(shutdown, db, logger)
 
-	//user := &model.User{UserName:"efren.gl" , Email:"efren.gl@gmail.com" }
-	//repo.Save(user)
+	tests := UserTests{
+		app: New(shutdown, test.DB,  test.Log, test.Authenticator, test.Cache),
+		userToken: test.Token("admin", "Nominable2018."),
+	}
 
 	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
 	req, err := http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer(jsonStr))
@@ -52,15 +70,15 @@ func TestCreateHandler(t *testing.T) {
 
 	// Our API expects a json body, so set the content-type header to make sure it's treated as one.
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Authorization", "Bearer "+tests.userToken)
 
 	w := httptest.NewRecorder()
-	server.ServeHTTP(w, req)
+	tests.app.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
-
-	teardown(db)
 }
 
+/*
 func TestUpdateHandler(t *testing.T) {
 	db := setup()
 
@@ -98,3 +116,4 @@ func TestUpdateHandler(t *testing.T) {
 
 	teardown(db)
 }
+*/
