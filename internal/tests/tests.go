@@ -66,7 +66,7 @@ func NewIntegration(t *testing.T) *Test {
 	logger.Formatter = &log.JSONFormatter{}
 
 	// Create RSA keys to enable authentication in our service.
-	key := []byte("testing")
+	key := []byte("my-secret-token-to-change-in-production")
 	// Build an authenticator using this static key.
 	kid := "4754d86b-7a6d-4df5-9c65-224741361492"
 	kf := auth.NewSimpleKeyLookupFunc(kid, key)

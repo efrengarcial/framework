@@ -2,15 +2,17 @@ package delivery
 
 import (
 	"bytes"
+	"context"
 	"github.com/efrengarcial/framework/internal/domain"
 	"github.com/efrengarcial/framework/internal/tests"
-	"github.com/jinzhu/gorm"
+	"github.com/efrengarcial/framework/internal/user/migration"
+	"github.com/efrengarcial/framework/internal/user/repository"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/gormigrate.v1"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -22,47 +24,21 @@ type UserTests struct {
 	userToken string
 }
 
-func start(db *gorm.DB) error {
-	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
-		// you migrations here
-	})
-
-	m.InitSchema(func(tx *gorm.DB) error {
-		err := tx.AutoMigrate(
-			&domain.User{},
-			&domain.Authority{},
-			&domain.Privilege{},
-			// all other tables of you app
-		).Error
-		if err != nil {
-			return err
-		}
-		user := &domain.User{ Login: "admin" , Email:"admin@example.com" ,Password: "$2a$10$AWLfzWwoq7es.PM3Z1uMieRAeRuck2F.kW9WeEpIdGsk4ykizXLqm"}
-		tx.Create(&user)
-
-		// all other foreign keys...
-		return nil
-	})
-
-
-	return m.Migrate()
-}
-
 //https://medium.com/@yaravind/go-sqlite-on-windows-f91ef2dacfe
 func TestCreateHandler(t *testing.T) {
 
 	test := tests.NewIntegration(t)
 	defer test.Teardown()
-	start(test.DB)
+	migration.Start(test.DB)
 
 	shutdown := make(chan os.Signal, 1)
 
 	tests := UserTests{
 		app: New(shutdown, test.DB,  test.Log, test.Authenticator, test.Cache),
-		userToken: test.Token("admin", "Nominable2018."),
+		userToken: test.Token("admin", "admin"),
 	}
 
-	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com"}`)
+	var jsonStr = []byte(`{"login":"efren.gl",  "email" :"efren.gl@gmail.com", "password": "pegasso" }`)
 	req, err := http.NewRequest("POST", "/api/v1/users", bytes.NewBuffer(jsonStr))
 	if err != nil {
 		t.Fatal(err)
@@ -78,18 +54,20 @@ func TestCreateHandler(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code)
 }
 
-/*
+
 func TestUpdateHandler(t *testing.T) {
-	db := setup()
+	test := tests.NewIntegration(t)
+	defer test.Teardown()
+	migration.Start(test.DB)
 
-	logger := log.New()
-	logger.Out = os.Stdout
-	logger.Level = log.InfoLevel
-	logger.Formatter = &log.JSONFormatter{}
-
-	repo := repository.NewUserGormRepository(db)
 	shutdown := make(chan os.Signal, 1)
-	server := New(shutdown, db, logger)
+
+	tests := UserTests{
+		app: New(shutdown, test.DB,  test.Log, test.Authenticator, test.Cache),
+		userToken: test.Token("admin", "admin"),
+	}
+
+	repo := repository.NewUserGormRepository(test.DB)
 	user := &domain.User{Login: "efren.gl" , Email:"efren.garcia@gmail.com" }
 	err := repo.Insert(context.Background(), user)
 	if err != nil {
@@ -107,13 +85,11 @@ func TestUpdateHandler(t *testing.T) {
 
 	// Our API expects a json body, so set the content-type header to make sure it's treated as one.
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Authorization", "Bearer "+tests.userToken)
 
 	w := httptest.NewRecorder()
-	server.ServeHTTP(w, req)
+	tests.app.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-
-
-	teardown(db)
 }
-*/
+

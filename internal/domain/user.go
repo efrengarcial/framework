@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	. "github.com/markbates/pop/nulls"
+	. "github.com/gobuffalo/nulls"
 	"github.com/thoas/go-funk"
 )
 
@@ -12,9 +12,9 @@ type Password string
 // User represents a user in the system.
 type User struct {
 	Model
-	TenantId      Int64       `json:"tenantId"`
+	TenantId      Int64  `json:"tenantId"`
 	Login         string      `json:"login" binding:"required" gorm:"not null"`
-	Password      Password    `json:"password" binding:"required" gorm:"not null"`
+	Password      Password    `json:"password"`
 	FirstName     string      `json:"firstName"`
 	LastName      string      `json:"lastName"`
 	Email         string      `json:"email" binding:"required" gorm:"not null"`
@@ -23,7 +23,7 @@ type User struct {
 	ImageUrl      string      `json:"imageUrl"`
 	ActivationKey string      `json:"-"`
 	ResetKey      string      `json:"-"`
-	ResetDate     time.Time   `json:"resetDate" gorm:"type:timestamp"`
+	ResetDate     time.Time   `json:"resetDate"`
 	Authorities   []Authority `gorm:"many2many:fw_user_authority;association_autoupdate:false;association_autocreate:false"`
 	Permissions   []string    `json:"permissions" gorm:"-"` // Ignore this field
 }

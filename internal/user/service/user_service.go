@@ -76,12 +76,12 @@ func (service *userService) Update(ctx context.Context, us *domain.User)  error 
 		existingUser domain.User
 	)
 
-	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(us.Email));  us.ID !=  existingUser.ID {
+	if  existingUser  , err =  service.repository.FindOneByEmail(ctx, strings.ToLower(us.Email)); existingUser.ID > 0 && us.ID !=  existingUser.ID {
 		return user.ErrEmailAlreadyUsed
 	}
 	if err != nil { return err }
 
-	if  existingUser  , err =  service.repository.FindOneByLogin(ctx, strings.ToLower(us.Login)); us.ID !=  existingUser.ID {
+	if  existingUser  , err =  service.repository.FindOneByLogin(ctx, strings.ToLower(us.Login)); existingUser.ID > 0 && us.ID !=  existingUser.ID {
 		return user.ErrLoginAlreadyUsed
 	}
 	if err != nil { return err }

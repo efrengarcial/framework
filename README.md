@@ -10,4 +10,4 @@ http://localhost:8181/api/v1/users
   "login": "efren.gl14", "password" : "123456" , "email" : "efren.gl14@gmail.com"
 }
 
-USERS_DB_HOST=localhost:5433
+DB_HOST=localhost:5433

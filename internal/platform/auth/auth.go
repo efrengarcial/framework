@@ -98,7 +98,12 @@ func (a *Authenticator) SetUser(ctx context.Context, login string) (context.Cont
 	user := &domain.User{}
 	err := a.cache.Get("user", &user)
 
-	if err != nil || user.ID == 0 {
+	if err !=nil && err != cache.ErrCacheMiss 	{
+		a.cache.Delete("user")
+		return nil, err
+	}
+
+	if user.ID == 0 {
 		orm := ocgorm.WithContext(ctx, a.repo.DB())
 		err := orm.Preload("Authorities.Privileges").Where("login = ?", login).First(&user).Error
 		if err !=nil {

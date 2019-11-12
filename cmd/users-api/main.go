@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/efrengarcial/framework/internal/platform/auth"
 	"github.com/efrengarcial/framework/internal/platform/cache"
+	"github.com/efrengarcial/framework/internal/user/migration"
 	"net/http"
 	"os"
 	"os/signal"
@@ -41,13 +42,13 @@ type config struct {
 		User       string `envDefault:"postgres"`
 		Password   string `envDefault:"password"`
 		Host       string `env:"DB_HOST" envDefault:"0.0.0.0"`
-		Name       string `envDefault:"postgres"`
+		Name       string `env:"DB_NAME" envDefault:"postgres"`
 		DisableTLS bool   `envDefault:"true"`
 	}
 	Auth struct {
 		KeyID          string `envDefault:"1"`
 		PrivateKeyFile string `envDefault:"/app/private.pem"`
-		SecretKey	   string `envDefault:"mySuperSecretKeyLol"`
+		SecretKey	   string `envDefault:"my-secret-token-to-change-in-production"`
 		Algorithm      string `envDefault:"HS512"`
 	}
 	Zipkin struct {
@@ -135,7 +136,7 @@ func run()  error {
 	// into database columns/types etc. This will
 	// check for changes and migrate them each time
 	// this service is restarted.
-	//db.AutoMigrate(&domain.User{}, &domain.Authority{}, &domain.Privilege{})
+	migration.Start(db)
 
 	// =========================================================================
 	// Start Tracing Support
