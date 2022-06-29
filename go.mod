@@ -6,7 +6,7 @@ require (
 	contrib.go.opencensus.io/exporter/prometheus v0.1.0
 	contrib.go.opencensus.io/exporter/zipkin v0.1.1
 	github.com/DATA-DOG/go-sqlmock v1.3.3
-	github.com/Masterminds/goutils v1.1.0
+	github.com/Masterminds/goutils v1.1.1
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/caarlos0/env/v6 v6.1.0
@@ -16,7 +16,6 @@ require (
 	github.com/go-redis/redis v6.15.5+incompatible
 	github.com/go-test/deep v1.0.1
 	github.com/gobuffalo/nulls v0.1.0
-	github.com/gobuffalo/pop v4.12.2+incompatible
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/jinzhu/gorm v1.9.7
 	github.com/markbates/pop v3.60.6+incompatible
